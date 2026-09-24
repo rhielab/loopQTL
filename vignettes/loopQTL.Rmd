@@ -1,0 +1,349 @@
+---
+title: "Using loopQTL"
+output:
+    BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
+package: loopQTL
+author: Rhie Lab at the University of Southern California
+description: >
+  This vignette describes the basic usage of the loopQTL package to map
+  chromatin loop QTLs from Hi-C: which SNPs at a chromatin loop's anchors
+  associate with the loop's contact strength across samples.
+vignette: >
+  %\VignetteIndexEntry{Using loopQTL}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+\RaggedRight
+
+```{r, echo = FALSE, message = FALSE}
+## `crop = NULL` resolves "The magick package is required to crop ..." error;
+## see: https://stat.ethz.ch/pipermail/bioc-devel/2020-April/016656.html
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", crop = NULL)
+options(tibble.print_min = 4, tibble.print_max = 4)
+```
+
+## Introduction
+loopQTL identifies SNPs associated with chromatin interaction signals across
+samples. It implements a band-wise joint normalization approach
+(referenced from Brant et al[^Brant]) that systematically tests the
+association between variants and their anchored loops, together with downstream
+functions for annotation and visualization for the user's convenience.
+
+This vignette walks through the basic loopQTL workflow.
+
+[^Brant] [Fletez-Brant K, Qiu Y, Gorkin DU, Hu M, Hansen KD. Removing unwanted
+variation between samples in Hi-C experiments. Brief Bioinform. 2024 Mar
+27;25(3):bbae217. doi: 10.1093/bib/bbae217. PMID: 38711367; PMCID:
+PMC11074651.](https://doi.org/10.1093/bib/bbae217)
+
+# Acquiring and installing loopQTL and associated packages
+
+## System requirements
+
+R 4.6 or a newer version is required.
+
+On Ubuntu 24.04, successful installation required several additional packages.
+They can be installed by running the following command in a terminal:
+
+`sudo apt-get install r-base-dev libcurl4-openssl-dev libfreetype-dev libfribidi-dev libfontconfig-dev libharfbuzz-dev libtiff-dev libxml2-dev libssl-dev`
+
+No dependencies other than R are required on macOS or Windows.
+
+## Installation
+
+Two versions of the package are available.
+
+To install the stable version from Bioconductor, start R and run:
+
+```{r eval = FALSE}
+## Install BiocManager, which is required to install packages from Bioconductor
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+
+BiocManager::install("loopQTL")
+```
+The development version containing the most recent updates is available from
+our GitHub repository (<https://github.com/rhielab/loopQTL>).
+
+To install the development version from GitHub, start R and run:
+
+```{r eval = FALSE}
+## Install prerequisite packages to install the development version from GitHub
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+
+BiocManager::install(version = "devel")
+BiocManager::install("rhielab/loopQTL")
+```
+
+# Overview
+
+1. `loopQTLsetup` - Validate the multi-sample VCF header and per-sample
+   `.hic` metadata, read per-sample loop BEDPEs, and build the
+   exact-coordinate consensus loop set kept in `loops(obj)`. 
+2. `loopQTLnormalize` - Per-chromosome whole-genome straw pull followed by
+	band-wise quantile normalization across samples The output is saved in
+   `phenotype(obj)`. Optionally caches per-SNP contact-window matrices to a
+   file for later visualization with `loopQTLplotSnpWindow()` or
+   `loopQTLnormalize()`.
+3. `loopQTLchooseK` - Runs PCA on the normalized phenotype matrix and picks
+   K via PCAForQTL's method. This function returns the chosen K and the
+   corresponding sample PCs.
+4. `runQTL` - Tabix-reads anchor-window SNPs from the VCF, runs MatrixEQTL
+   to perform the loopQTL analysis. The output is saved in `results(obj)`.
+5. `loopQTLpairData` - Return the sample-level phenotype and genotype for a
+   single `(loopID, snpID)` pair - the row-level view behind any per-pair
+   downstream plot or custom test.
+6. `loopQTLannotate` - Adds `gene`, `peak` (optional), and `Type` columns
+   to `results(obj)` using a GTF for TSS mapping and an optional peak BED
+   file for regulatory-element overlap.
+7. `loopQTLplotPair` - Generates boxplot of the loop's contact-strength
+   phenotype grouped by the SNP's dosage class (0/1/2), for a specific SNP-loop
+   pair.
+8. `loopQTLplotLocus` - Locus-level ggplot track combining consensus loops,
+   the tested SNP, and (optionally) gene annotations, over a user-specified
+   genomic region.
+9. `loopQTLplotSnpWindow` - Hi-C-style beta heatmap around a chosen SNP: for
+   every bin-pair in the SNP's neighborhood, plots the per-sample
+   regression coefficient of phenotype on the SNP's dosage.
+
+To begin, load `loopQTL` and any downstream plotting deps.
+
+```{r setup, message = FALSE}
+library(loopQTL)
+library(ggplot2)
+```
+
+## `loopQTLsetup`: Validate inputs and build loopQTL object
+
+`loopQTLsetup()` is the entry point of the pipeline. It:
+
+* validates the input files header, including .vcf and .hic files;
+* reads each per-sample BEDPE and builds a consensus loop set by
+  exact-coordinate matching. Loops found fewer than `minSamples` samples will be
+  dropped;
+* Automatically computes per-sample cis-contact depth from the `.hic` files
+  when the samplesheet lacks a `cis` column.
+
+The samplesheet is a tab-separated file with columns `Sample`, `hic`,
+`loops`, and optionally `cis`.
+
+```{r}
+extdataDir <- system.file("extdata", package = "loopQTL")
+vcfPath <- file.path(extdataDir, "example.vcf.gz")
+samplesheetPath <- file.path(extdataDir, "example_samplesheet.tsv")
+samples <- read.table(samplesheetPath, header = TRUE)
+
+## Fix the input file paths to be absolute since we don't know what the working
+## directory will be when the vignette is built. It is not necessary to do this
+## during normal use of loopQTL if the working directory is set correctly.
+samples$hic <- unlist(
+    lapply(samples$hic, function(x) {
+        file.path(extdataDir, x)
+    })
+)
+samples$loops <- unlist(
+    lapply(samples$loops, function(x) {
+        file.path(extdataDir, x)
+    })
+)
+
+## Display the format of the samplesheet
+head(samples)
+```
+
+```{r}
+## Run loopQTLsetup
+obj <- loopQTLsetup(
+    samples    = samples,
+    vcf        = vcfPath,
+    resolution = 10000,
+    minSamples = 2
+)
+obj
+```
+
+## `loopQTLnormalize`: Cross-normalization on Hi-C signal
+
+`loopQTLnormalize()` normalizes contact strength across samples so that
+per-loop phenotypes are directly comparable. For each chromosome it pulls
+the whole-genome straw matrix per sample, log-CPM adjusts, then does
+band-wise quantile normalization across samples per genomic-distance band. 
+Normalized values at the consensus-loop bin-pairs are written to
+`phenotype(obj)`. Parallelizes per chromosome via `BiocParallel`.
+
+Set `saveWindows = TRUE` to additionally output a per-SNP contact-window matrix 
+as .rds file. This file is needed by `loopQTLplotSnpWindow()` downstream. Please 
+note that this option does not change `phenotype(obj)` or affect the `runQTL()`
+step.
+
+```{r}
+## Get the path to a temporary directory in which to save the output interact
+## file
+tempDirectory <- tempdir()
+
+obj <- loopQTLnormalize(
+    obj,
+    BPPARAM     = BiocParallel::MulticoreParam(workers = 2),
+    saveWindows = TRUE,
+    windowsOut  = file.path(tempDirectory, "loop_snp_windows.rds"),
+    window      = 2000000,
+    snpWindow   = 10000
+)
+
+head(phenotype(obj)[, 1:5])
+```
+
+## `loopQTLchooseK`: Auto-select the number of PCs for covariates
+
+`loopQTLchooseK()` runs PCA on the normalized phenotype matrix and picks a
+number of principal components K to use as covariates in the downstream
+regression. This function returns a list with the chosen K and the
+sample × K matrix of PCs.
+
+```{r}
+Kres <- loopQTLchooseK(obj, Kmethod = "elbow")
+message("PCAForQTL chose K = ", Kres$K, " via ", Kres$method)
+head(Kres$PCs)
+```
+
+## `runQTL`: Anchor-restricted association testing
+
+`runQTL()` reads all anchor-window SNPs from the VCF in a single targeted
+tabix pass, converts them to dosages (0/1/2), and runs MatrixEQTL twice -
+once treating anchor A as the gene position, once anchor B. The two result
+tables are outer-joined on SNP-loop level.  Covariates are supplied via the 
+`covariates` argument - typically the phenotype PCs chosen in the previous step.
+RINT is applied per loop before regression by default.
+
+```{r}
+obj <- runQTL(
+    obj,
+    window     = 10000,
+    covariates = Kres$PCs
+)
+head(results(obj))
+```
+
+## `loopQTLpairData`: Sample-level view of one loop × SNP pair
+
+`loopQTLpairData()` returns the per-sample phenotype and genotype
+(dosage 0/1/2) for a single SNP-loop pair. Useful for inspecting a
+specific hit or exporting sample-level values for reporting.
+
+```{r}
+pair <- loopQTLpairData(
+    obj,
+    loopID = "L0000187_chr1_46030000_46220000",
+    snpID  = "rs11584814"
+)
+head(pair)
+```
+
+## `loopQTLannotate`: Annotate results with target genes and regulatory peaks
+
+`loopQTLannotate()` adds three columns to `results(obj)`:
+
+* **`gene`** - comma-separated gene names whose TSS (± `TSSwindow`) sits in
+  the SNP's *partner* anchor.
+* **`peak`** - logical: does the SNP overlap any peak from the user-supplied
+  peak file . If the distal TSS peaks are preferred, then you can set
+  `removeTSS = TRUE``.
+* **`Type`** - annotation of each SNP-loop pair such as `WithinTSS`, `rs-gene`,
+  `rs-<peakAnnotation>`, `rs-O`, `rs(<peakAnnotation>)-gene`, or
+  `rs(<peakAnnotation>)-<peakAnnotation>` summarizing the SNP–loop types.
+
+```{r}
+peaksPath <- system.file("extdata", "example_annotation.bed", package = "loopQTL")
+gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
+obj <- loopQTLannotate(
+    obj,
+    peak            = peaksPath,
+    peakAnnotation  = "Enhancer",
+    TSSwindow       = 2000,
+    removeTSS       = TRUE,
+    gtf             = gtfPath
+)
+head(results(obj))
+```
+
+## `loopQTLplotPair`: Boxplot of loop strength by SNP dosage
+
+`loopQTLplotPair()` renders the per-sample boxplot behind a chosen result
+SNP-loop pair. Please note that the plot is a ggplot object that you can save
+with `ggsave()`.
+
+```{r}
+p <- loopQTLplotPair(
+    obj,
+    loopID = "L0000187_chr1_46030000_46220000",
+    snpID  = "rs11584814"
+)
+p
+```
+
+## `loopQTLplotLocus`: Locus-level track view of loops, SNPs, and genes
+
+`loopQTLplotLocus()` renders a locus-scale ggplot combining the consensus
+loops, the tested SNP, and (when a GTF is supplied) gene annotations, over
+a user-specified region. Please note that to sse `values = "cpm"` or 
+`values = "raw"` to show per-loop contact strength, you need to set
+`saveWindows = TRUE`  to save the per-SNP contact-window matrices from
+loopQTLnormalize.
+
+```{r}
+gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
+p <- loopQTLplotLocus(
+    obj,
+    chrom = "chr1",
+    start = 45900000,
+    end = 46300000,
+    snpID = "rs11584814",
+    values = "cpm",
+    gtf = gtfPath
+)
+p
+```
+
+## `loopQTLplotSnpWindow`: Hi-C-style beta heatmap around a SNP
+
+`loopQTLplotSnpWindow()` renders a Hi-C-style heatmap centered on a chosen
+SNP: for every bin-pair in the SNP's cached contact window (from
+`loopQTLnormalize(saveWindows = TRUE)`), the color encodes the per-sample
+regression coefficient (beta) of the bin-pair's contact strength on the SNP's
+dosage. Set `normal = TRUE` and `covariates = "auto"` to match the model
+used in `runQTL()`.
+
+```{r}
+p <- loopQTLplotSnpWindow(
+    obj,
+    chrom      = "chr1",
+    start      = 45900000,
+    end        = 46300000,
+    snpID      = "rs11584814",
+    normal     = TRUE,
+    covariates = "auto",
+    Kmax       = 2
+)
+
+## Delete the output file, since this is just an example.
+## Do not use this line if running on real data, as it will delete your created
+## file.
+invisible(file.remove(metadata(obj)$windowsOut))
+
+p
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

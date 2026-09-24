@@ -1,0 +1,9 @@
+^doc$
+^Meta$
+
+# Stray build/check artifacts that should never ship
+^BiocCheck.*\.txt$
+^Rcheck.*\.txt$
+^.*\.patch$
+^loopQTL_test\.R$
+^loopQTL\.pdf$

@@ -1,0 +1,45 @@
+Package: loopQTL
+Title: Anchor-Restricted Loop QTL Mapping from Hi-C
+Version: 0.99.0
+Authors@R: c(person("Rhie Lab at the University of Southern California", email = "rhielab@gmail.com", role = "cre"), person("Zexun", "Wu", role = "aut", email = "zexunwu@usc.edu"))
+Description: Maps chromatin loop QTLs by testing whether genotype at a loop's
+    anchors associates with the loop's contact strength across samples. Reads
+    .hic files via strawr, builds an exact-coordinate consensus loop set,
+    normalizes contact strength across samples via band-wise quantile
+    normalization in the style of BNBC (implemented on top of
+    preprocessCore), and runs anchor-restricted SNP-by-loop regressions with
+    MatrixEQTL. Intra-chromosomal loops only; no FDR or lead-SNP selection
+    (left to the user).
+URL: https://github.com/rhielab/loopQTL
+BugReports: https://github.com/rhielab/loopQTL/issues
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+BiocType: Software
+biocViews: Software, DNA3DStructure, Epigenetics, HiC, QuantitativeTrailLocus, SNP
+Depends: R (>= 4.4)
+Imports:
+    methods,
+    stats,
+    utils,
+    strawr,
+    preprocessCore,
+    MatrixEQTL,
+    GenomicRanges,
+    IRanges,
+    InteractionSet,
+    S4Vectors,
+    VariantAnnotation,
+    Rsamtools,
+    SummarizedExperiment,
+    BiocParallel,
+    data.table,
+    ggplot2,
+    scales,
+    rtracklayer,
+    patchwork
+Suggests: BiocStyle, knitr, rmarkdown
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
+RoxygenNote: 7.3.3
