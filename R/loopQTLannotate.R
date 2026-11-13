@@ -57,12 +57,12 @@
 #' @examples
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of loopQTLsetup().
-#' ##Here we just use the example object.
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
 #' ## get the path of example annotation files
 #' extdataDir <- system.file("extdata", package = "loopQTL")
-#' peakPath   <- file.path(extdataDir, "example_annotation.bed")
-#' gtfPath    <- file.path(extdataDir, "example.gtf.gz")
+#' peakPath <- file.path(extdataDir, "example_annotation.bed")
+#' gtfPath <- file.path(extdataDir, "example.gtf.gz")
 #'
 #' ## Annotate SNP-loop pairs with gene, peak overlap, and Type
 #' obj <- loopQTLannotate(
@@ -71,9 +71,10 @@
 #'     peak           = peakPath,
 #'     peakAnnotation = "Enhancer",
 #'     TSSwindow      = 2000,
-#'     removeTSS      = TRUE)
-#' 
-#' ##check the annotated results
+#'     removeTSS      = TRUE
+#' )
+#'
+#' ## check the annotated results
 #' head(results(obj))
 loopQTLannotate <- function(obj,
                             gtf,

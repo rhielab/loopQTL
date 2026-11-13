@@ -7,7 +7,7 @@
 loopQTLExampleData()
 }
 \value{
-A \linkS4class{loopQTL} object with \code{phenotype}, \code{results},
+A \link[=loopQTL-class]{loopQTL} object with \code{phenotype}, \code{results},
 and \code{metadata} populated.
 }
 \description{

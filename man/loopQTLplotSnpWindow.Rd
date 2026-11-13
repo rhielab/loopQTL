@@ -123,5 +123,6 @@ p <- loopQTLplotSnpWindow(
     end        = 46300000,
     snpID      = "rs11584814",
     normal     = TRUE,
-    covariates = "auto")
+    covariates = "auto"
+)
 }

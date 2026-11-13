@@ -26,8 +26,10 @@ test_that("accessor methods return the expected slot types", {
 
     expect_s3_class(results(obj), "data.frame")
     expect_true(all(
-        c("loopID", "snpID", "chrom", "pos", "ref", "alt",
-          "beta", "se", "p", "nUsed", "maf") %in% names(results(obj))
+        c(
+            "loopID", "snpID", "chrom", "pos", "ref", "alt",
+            "beta", "se", "p", "nUsed", "maf"
+        ) %in% names(results(obj))
     ))
 
     expect_type(metadata(obj), "list")

@@ -33,29 +33,32 @@
 #' vcfPath <- file.path(extdataDir, "example.vcf.gz")
 #' samplesheetPath <- file.path(extdataDir, "example_samplesheet.tsv")
 #' samples <- read.table(samplesheetPath, header = TRUE)
-#' 
-#' ##modify the relative file path
+#'
+#' ## modify the relative file path
 #' samples$hic <- unlist(
 #'     lapply(samples$hic, function(x) {
 #'         file.path(extdataDir, x)
-#'     }))
+#'     })
+#' )
 #' samples$loops <- unlist(
 #'     lapply(samples$loops, function(x) {
 #'         file.path(extdataDir, x)
-#'     }))
-#' 
+#'     })
+#' )
+#'
 #' ## Run loopQTLsetup
 #' obj <- loopQTLsetup(
 #'     samples    = samples,
 #'     vcf        = vcfPath,
 #'     resolution = 10000,
-#'     minSamples = 2)
+#'     minSamples = 2
+#' )
 loopQTLsetup <- function(
-    samples,
-    vcf,
-    resolution,
-    minSamples = 2,
-    BPPARAM = BiocParallel::SerialParam()
+  samples,
+  vcf,
+  resolution,
+  minSamples = 2,
+  BPPARAM = BiocParallel::SerialParam()
 ) {
     stopifnot(
         is.data.frame(samples),
@@ -320,9 +323,9 @@ loopQTLsetup <- function(
 ## the given chroms. Returns a named numeric vector (one entry per sample).
 ## Parallel unit of work: one (sample, chrom) straw pull + sum.
 .computeCisFromHiC <- function(
-    hicPaths, sampleIDs, chroms,
-    resolution, chromNorms,
-    BPPARAM = BiocParallel::SerialParam()
+  hicPaths, sampleIDs, chroms,
+  resolution, chromNorms,
+  BPPARAM = BiocParallel::SerialParam()
 ) {
     grid <- expand.grid(
         sampleI = seq_along(sampleIDs),

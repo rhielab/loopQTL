@@ -49,12 +49,13 @@ in the previous step. By default, rank-based inverse normal transformation
 \examples{
 ## Load the example object. In real analysis, the input
 ## should be the output of loopQTLnormalize().
-##Here we just use the example object.
+## Here we just use the example object.
 obj <- loopQTLExampleData()
-##Run the function, please note that the covariates option is not specified.
+## Run the function, please note that the covariates option is not specified.
 obj <- runQTL(
-   obj,
-   window     = 10000)
+    obj,
+    window = 10000
+)
 
 ## In real analysis we recommend running runQTL() with covariates
 ## specified for more accurate regression, typically the top-K PCs.
@@ -64,5 +65,6 @@ Kres <- loopQTLchooseK(obj)
 obj <- runQTL(
     obj,
     window     = 10000,
-    covariates = Kres$PCs)
+    covariates = Kres$PCs
+)
 }

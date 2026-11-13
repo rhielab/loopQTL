@@ -81,24 +81,25 @@
 #'     end        = 46300000,
 #'     snpID      = "rs11584814",
 #'     normal     = TRUE,
-#'     covariates = "auto")
+#'     covariates = "auto"
+#' )
 loopQTLplotSnpWindow <- function(
-    obj, snpID,
-    chrom = NULL,
-    start = NULL,
-    end = NULL,
-    windows = NULL,
-    mirror = TRUE,
-    minSamplesPerCell = 3,
-    normal = FALSE,
-    covariates = NULL,
-    Kmethod = c("elbow", "BE"),
-    Kmax = NULL,
-    limit = NULL,
-    palette = "RdBu",
-    metric = c("betaLogp", "beta"),
-    values = c("normalized", "cpm", "raw"),
-    axisUnit = c("Mb", "bp")
+  obj, snpID,
+  chrom = NULL,
+  start = NULL,
+  end = NULL,
+  windows = NULL,
+  mirror = TRUE,
+  minSamplesPerCell = 3,
+  normal = FALSE,
+  covariates = NULL,
+  Kmethod = c("elbow", "BE"),
+  Kmax = NULL,
+  limit = NULL,
+  palette = "RdBu",
+  metric = c("betaLogp", "beta"),
+  values = c("normalized", "cpm", "raw"),
+  axisUnit = c("Mb", "bp")
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -437,12 +438,12 @@ loopQTLplotSnpWindow <- function(
         ) +
         ggplot2::theme_classic(base_size = 11) +
         ggplot2::theme(
-            plot.subtitle    = ggplot2::element_text(size = 9),
-            panel.grid       = ggplot2::element_blank(),
+            plot.subtitle = ggplot2::element_text(size = 9),
+            panel.grid = ggplot2::element_blank(),
             panel.background = ggplot2::element_rect(
                 fill = "white", color = NA
             ),
-            axis.line        = ggplot2::element_line(linewidth = 0.3)
+            axis.line = ggplot2::element_line(linewidth = 0.3)
         )
 }
 
@@ -488,7 +489,7 @@ loopQTLplotSnpWindow <- function(
     vcfChromNormalizerFunc <- .make_chrom_normalizer(vcfChroms)
     gr <- GenomicRanges::GRanges(
         seqnames = vcfChromNormalizerFunc(chrom),
-        ranges   = IRanges::IRanges(
+        ranges = IRanges::IRanges(
             start = as.integer(pos), end = as.integer(pos)
         )
     )

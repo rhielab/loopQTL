@@ -27,12 +27,13 @@
 #' @examples
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of loopQTLnormalize().
-#' ##Here we just use the example object.
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
-#' ##Run the function, please note that the covariates option is not specified.
+#' ## Run the function, please note that the covariates option is not specified.
 #' obj <- runQTL(
-#'    obj,
-#'    window     = 10000)
+#'     obj,
+#'     window = 10000
+#' )
 #'
 #' ## In real analysis we recommend running runQTL() with covariates
 #' ## specified for more accurate regression, typically the top-K PCs.
@@ -42,15 +43,16 @@
 #' obj <- runQTL(
 #'     obj,
 #'     window     = 10000,
-#'     covariates = Kres$PCs)
+#'     covariates = Kres$PCs
+#' )
 runQTL <- function(
-    obj,
-    window = 0,
-    covariates = NULL,
-    normal = TRUE,
-    Kmethod = c("elbow", "BE"),
-    Kmax = NULL,
-    pvOutputThreshold = 1
+  obj,
+  window = 0,
+  covariates = NULL,
+  normal = TRUE,
+  Kmethod = c("elbow", "BE"),
+  Kmax = NULL,
+  pvOutputThreshold = 1
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -105,7 +107,7 @@ runQTL <- function(
     }
     vcfChromNormalizerFunc <- .make_chrom_normalizer(vcfChroms)
     rt_chroms_vcf <- vcfChromNormalizerFunc(
-            as.character(GenomicRanges::seqnames(readTargets))
+        as.character(GenomicRanges::seqnames(readTargets))
     )
     keep <- rt_chroms_vcf %in% vcfChroms
     if (!any(keep)) {
@@ -124,7 +126,8 @@ runQTL <- function(
         which = readTargets, geno = "GT", info = NA_character_
     )
     vcf <- VariantAnnotation::readVcf(
-            obj@vcfPath, genome = "unknown", param = param
+        obj@vcfPath,
+        genome = "unknown", param = param
     )
     if (length(vcf) == 0) {
         return(.returnEmpty())
@@ -144,7 +147,7 @@ runQTL <- function(
     colnames(dosage) <- samplesVec
 
     rr <- SummarizedExperiment::rowRanges(vcf)
-    snpChromVCF <- as.character(GenomicRanges::seqnames(rr)) 
+    snpChromVCF <- as.character(GenomicRanges::seqnames(rr))
     snpPos <- GenomicRanges::start(rr)
     snpRef <- as.character(VariantAnnotation::ref(vcf))
     altList <- VariantAnnotation::alt(vcf)
@@ -341,9 +344,9 @@ runQTL <- function(
 
 ## Run MatrixEQTL and return a simplified data.frame of cis hits
 .run_matrix_eqtl <- function(
-    snpsSd, geneSD, cvrtSd,
-    snpspos, genepos,
-    cisDist, pvOutputThreshold
+  snpsSd, geneSD, cvrtSd,
+  snpspos, genepos,
+  cisDist, pvOutputThreshold
 ) {
     tmpCis <- tempfile()
     on.exit(unlink(tmpCis), add = TRUE)

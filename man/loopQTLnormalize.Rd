@@ -16,8 +16,8 @@ loopQTLnormalize(
 \arguments{
 \item{obj}{A loopQTL object created from \code{loopQTLsetup()}.}
 
-\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} for parallelization
-over chromosomes. Default \code{\link[BiocParallel:SerialParam-class]{BiocParallel::SerialParam()}}.}
+\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam]{BiocParallel::BiocParallelParam} for parallelization
+over chromosomes. Default \code{\link[BiocParallel:SerialParam]{BiocParallel::SerialParam()}}.}
 
 \item{saveWindows}{Logical. If \code{TRUE}, also save a local contact submatrix
 around each in-loop SNP for downstream functions usage.}
@@ -51,14 +51,15 @@ a per-SNP contact-window matrix as .rds file. This file is needed by the
 \examples{
 ## Load the example object. In real analysis, the input
 ## should be the output of loopQTLsetup().
-##Here we just use the example object.
+## Here we just use the example object.
 obj <- loopQTLExampleData()
 ## Example code to run loopQTLnormalize(). By default it will NOT create
 ## the .rds contact submatrix file that downstream functions need.
 obj <- loopQTLnormalize(
     obj,
     BPPARAM     = BiocParallel::MulticoreParam(workers = 2),
-    snpWindow   = 10000)
+    snpWindow   = 10000
+)
 
 ## Example code to run loopQTLnormalize() and also create the `.rds`
 ## contact submatrix file needed by downstream visualization functions.
@@ -71,5 +72,6 @@ obj <- loopQTLnormalize(
     saveWindows = TRUE,
     windowsOut  = file.path(tempDirectory, "loop_snp_windows.rds"),
     window      = 2000000,
-    snpWindow   = 10000)
+    snpWindow   = 10000
+)
 }

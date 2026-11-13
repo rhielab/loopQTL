@@ -268,7 +268,8 @@ head(pair)
 
 ```{r run-annotate}
 peaksPath <- system.file(
-    "extdata", "example_annotation.bed", package = "loopQTL"
+    "extdata", "example_annotation.bed",
+    package = "loopQTL"
 )
 gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
 obj <- loopQTLannotate(
@@ -385,7 +386,8 @@ loops whose first anchor falls in a peak.
 
 ```{r interop-overlap}
 peakFile <- system.file(
-    "extdata", "example_annotation.bed", package = "loopQTL"
+    "extdata", "example_annotation.bed",
+    package = "loopQTL"
 )
 peaks <- rtracklayer::import(peakFile)
 
@@ -393,7 +395,7 @@ ov <- GenomicRanges::findOverlaps(
     InteractionSet::anchors(loops(obj), type = "first"),
     peaks
 )
-length(unique(S4Vectors::queryHits(ov)))  # loops with a peak at anchor A
+length(unique(S4Vectors::queryHits(ov))) # loops with a peak at anchor A
 ```
 
 The same pattern lets you pull QTL rows whose SNP overlaps any
@@ -418,9 +420,9 @@ sample-level assays), one can be constructed directly from
 
 ```{r interop-iset}
 iset <- InteractionSet::InteractionSet(
-    assays      = list(phenotype = phenotype(obj)),
+    assays = list(phenotype = phenotype(obj)),
     interactions = loops(obj),
-    colData      = S4Vectors::DataFrame(sample = samples(obj))
+    colData = S4Vectors::DataFrame(sample = samples(obj))
 )
 iset
 ```
@@ -435,7 +437,7 @@ Genome Browser, or any other tool that reads BED-family formats.
 ## Export the first anchor of each loop as a BED track.
 rtracklayer::export(
     InteractionSet::anchors(loops(obj), type = "first"),
-    con    = "loops_anchorA.bed",
+    con = "loops_anchorA.bed",
     format = "BED"
 )
 

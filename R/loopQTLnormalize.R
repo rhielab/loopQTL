@@ -30,15 +30,16 @@
 #' @examples
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of loopQTLsetup().
-#' ##Here we just use the example object.
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
 #' ## Example code to run loopQTLnormalize(). By default it will NOT create
 #' ## the .rds contact submatrix file that downstream functions need.
 #' obj <- loopQTLnormalize(
 #'     obj,
 #'     BPPARAM     = BiocParallel::MulticoreParam(workers = 2),
-#'     snpWindow   = 10000)
-#' 
+#'     snpWindow   = 10000
+#' )
+#'
 #' ## Example code to run loopQTLnormalize() and also create the `.rds`
 #' ## contact submatrix file needed by downstream visualization functions.
 #'
@@ -50,14 +51,15 @@
 #'     saveWindows = TRUE,
 #'     windowsOut  = file.path(tempDirectory, "loop_snp_windows.rds"),
 #'     window      = 2000000,
-#'     snpWindow   = 10000)
+#'     snpWindow   = 10000
+#' )
 loopQTLnormalize <- function(
-    obj,
-    BPPARAM = BiocParallel::SerialParam(),
-    saveWindows = FALSE,
-    windowsOut = NULL,
-    window = 1000000,
-    snpWindow = 0
+  obj,
+  BPPARAM = BiocParallel::SerialParam(),
+  saveWindows = FALSE,
+  windowsOut = NULL,
+  window = 1000000,
+  snpWindow = 0
 ) {
     stopifnot(methods::is(obj, "loopQTL"))
 
@@ -336,7 +338,8 @@ loopQTLnormalize <- function(
 
     chromResults <- BiocParallel::bplapply(
         chroms_to_run,
-        per_chr_worker, BPPARAM = BPPARAM
+        per_chr_worker,
+        BPPARAM = BPPARAM
     )
     names(chromResults) <- chroms_to_run
 

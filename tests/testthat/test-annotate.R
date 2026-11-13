@@ -6,9 +6,10 @@ test_that("loopQTLannotate() adds gene/peak/Type to results", {
     obj@results$peak <- NULL
     obj@results$Type <- NULL
 
-    gtf  <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
+    gtf <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
     peak <- system.file("extdata", "example_annotation.bed",
-                        package = "loopQTL")
+        package = "loopQTL"
+    )
 
     obj2 <- loopQTLannotate(
         obj,

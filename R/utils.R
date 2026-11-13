@@ -99,8 +99,8 @@
 ##   )
 ## Returns NULL if no eligible SNPs are found (caller short-circuits).
 .compute_snp_windows <- function(
-    vcfPath, anchorA, anchorB,
-    snpWindow, window, resolution
+  vcfPath, anchorA, anchorB,
+  snpWindow, window, resolution
 ) {
     if (!file.exists(vcfPath)) {
         .stopNoCall("VCF not found: ", vcfPath)
@@ -143,7 +143,8 @@
         info = NA_character_
     )
     vcf <- VariantAnnotation::readVcf(
-        vcfPath, genome = "unknown", param = param
+        vcfPath,
+        genome = "unknown", param = param
     )
     if (length(vcf) == 0) {
         warning(
@@ -413,7 +414,7 @@
 #' obj
 loopQTLExampleData <- function() {
     extdataDir <- system.file("extdata", package = "loopQTL")
-    rdaPath    <- file.path(extdataDir, "example_loopQTL_obj.rda")
+    rdaPath <- file.path(extdataDir, "example_loopQTL_obj.rda")
     e <- new.env()
     load(rdaPath, envir = e)
     obj <- e$obj
@@ -427,11 +428,11 @@ loopQTLExampleData <- function() {
         obj@metadata$hicPaths <- setNames(
             file.path(
                 extdataDir, "example_hic",
-                paste0(names(obj@metadata$hicPaths), ".hic")),
+                paste0(names(obj@metadata$hicPaths), ".hic")
+            ),
             names(obj@metadata$hicPaths)
         )
     }
     obj@vcfPath <- file.path(extdataDir, "example.vcf.gz")
     obj
 }
-                                

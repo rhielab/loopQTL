@@ -6,7 +6,7 @@
         file.path(extdataDir, "example_samplesheet.tsv"),
         header = TRUE, stringsAsFactors = FALSE
     )
-    s$hic   <- file.path(extdataDir, s$hic)
+    s$hic <- file.path(extdataDir, s$hic)
     s$loops <- file.path(extdataDir, s$loops)
     s
 }
@@ -37,8 +37,10 @@ test_that("loopQTLsetup() builds a valid loopQTL object from extdata", {
 
 test_that("loopQTLsetup() rejects malformed input", {
     expect_error(
-        loopQTLsetup(samples = "not a dataframe", vcf = "x.vcf.gz",
-                     resolution = 10000),
+        loopQTLsetup(
+            samples = "not a dataframe", vcf = "x.vcf.gz",
+            resolution = 10000
+        ),
         regexp = "is.data.frame"
     )
 

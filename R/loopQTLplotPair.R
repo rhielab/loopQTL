@@ -17,17 +17,18 @@
 #' @examples
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of runQTL().
-#' ##Here we just use the example object. 
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
-#' ##Check results so that you can choose your interested loopID and snpID
+#' ## Check results so that you can choose your interested loopID and snpID
 #' head(results(obj))
 #' ## Then you can specify the specific SNP-loop pair data you want to
 #' ## plot as a classical QTL box plot.
-#' ##Return is a ggplot object so you can save with ggsave().
+#' ## Return is a ggplot object so you can save with ggsave().
 #' p <- loopQTLplotPair(
 #'     obj,
 #'     loopID = "L0000187_chr1_46030000_46220000",
-#'     snpID  = "rs11584814")
+#'     snpID  = "rs11584814"
+#' )
 loopQTLplotPair <- function(obj, loopID, snpID, normal = TRUE, jitter = TRUE) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -56,7 +57,8 @@ loopQTLplotPair <- function(obj, loopID, snpID, normal = TRUE, jitter = TRUE) {
     ## Pull per-sample pair data
     d <- loopQTLpairData(obj, loopID, snpID, normal = normal)
     d$genotypeFactor <- factor(
-        d$genotype, levels = c(0, 1, 2), labels = genotypeLabels
+        d$genotype,
+        levels = c(0, 1, 2), labels = genotypeLabels
     )
     d <- d[!is.na(d$genotypeFactor) & !is.na(d$phenotype), , drop = FALSE]
     if (nrow(d) == 0) {

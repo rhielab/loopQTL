@@ -18,16 +18,17 @@
 #' @examples
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of runQTL().
-#' ##Here we just use the example object. 
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
-#' ##Check results so that you can choose your interested loopID and snpID
+#' ## Check results so that you can choose your interested loopID and snpID
 #' head(results(obj))
 #' ## Then you can specify the specific SNP-loop pair data you want to
 #' ## check at samples level.
 #' pair <- loopQTLpairData(
 #'     obj,
 #'     loopID = "L0000187_chr1_46030000_46220000",
-#'     snpID  = "rs11584814")
+#'     snpID  = "rs11584814"
+#' )
 #' head(pair)
 loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {
     stopifnot(

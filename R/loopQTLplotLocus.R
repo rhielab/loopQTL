@@ -43,7 +43,7 @@
 #' ## If you specify `values = "cpm"` or `values = "raw"`, the object must
 #' ## carry the contact matrix `.rds` (see `metadata(obj)[["windowsOut"]]`);
 #' ## otherwise the normalized matrix stored in the object is used.
-#' ##Here we just use the example object.
+#' ## Here we just use the example object.
 #' obj <- loopQTLExampleData()
 #' ## You also need a gtf file input to give the genomic annotations.
 #' ## Here we provide an example gtf.
@@ -56,19 +56,20 @@
 #'     end = 46300000,
 #'     snpID = "rs11584814",
 #'     values = "cpm",
-#'     gtf = gtfPath)
+#'     gtf = gtfPath
+#' )
 loopQTLplotLocus <- function(
-    obj, snpID,
-    chrom, start, end,
-    gtf,
-    pThreshold = 0.05,
-    values = c("normalized", "cpm", "raw"),
-    windows = NULL,
-    strongColor = "#FF7917",
-    weakColor = "grey90",
-    limit = NULL,
-    geneBiotypes = "protein_coding",
-    axisUnit = c("Mb", "bp")
+  obj, snpID,
+  chrom, start, end,
+  gtf,
+  pThreshold = 0.05,
+  values = c("normalized", "cpm", "raw"),
+  windows = NULL,
+  strongColor = "#FF7917",
+  weakColor = "grey90",
+  limit = NULL,
+  geneBiotypes = "protein_coding",
+  axisUnit = c("Mb", "bp")
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -615,9 +616,9 @@ loopQTLplotLocus <- function(
 }
 
 .build_arc_panel <- function(
-    arcDF, start, end, axisFormat,
-    effLo, effHi, strongColor, weakColor,
-    panelTitle, showX = FALSE
+  arcDF, start, end, axisFormat,
+  effLo, effHi, strongColor, weakColor,
+  panelTitle, showX = FALSE
 ) {
     ## Expand each arc into a path of points
     paths <- do.call(rbind, lapply(seq_len(nrow(arcDF)), function(i) {

@@ -25,11 +25,11 @@ from the \code{.hic} files automatically.}
 \item{minSamples}{The minimum number of samples supporting a consensus
 loop. Default is 2 samples.}
 
-\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} that parallelizes the
+\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam]{BiocParallel::BiocParallelParam} that parallelizes the
 cis-computing straw pulls.}
 }
 \value{
-A \linkS4class{loopQTL} object with \code{samples}, \code{loops}, \code{vcfPath},
+A \link[=loopQTL-class]{loopQTL} object with \code{samples}, \code{loops}, \code{vcfPath},
 \code{resolution}, \code{cis}, and \code{metadata} populated.
 \code{phenotype} is an empty placeholder until loopQTLnormalize() fills it.
 }
@@ -54,20 +54,23 @@ vcfPath <- file.path(extdataDir, "example.vcf.gz")
 samplesheetPath <- file.path(extdataDir, "example_samplesheet.tsv")
 samples <- read.table(samplesheetPath, header = TRUE)
 
-##modify the relative file path
+## modify the relative file path
 samples$hic <- unlist(
     lapply(samples$hic, function(x) {
         file.path(extdataDir, x)
-    }))
+    })
+)
 samples$loops <- unlist(
     lapply(samples$loops, function(x) {
         file.path(extdataDir, x)
-    }))
+    })
+)
 
 ## Run loopQTLsetup
 obj <- loopQTLsetup(
     samples    = samples,
     vcf        = vcfPath,
     resolution = 10000,
-    minSamples = 2)
+    minSamples = 2
+)
 }

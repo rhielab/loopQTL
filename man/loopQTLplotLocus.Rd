@@ -78,7 +78,7 @@ a user-specified region. Please note that to use \code{values = "cpm"} or
 ## If you specify `values = "cpm"` or `values = "raw"`, the object must
 ## carry the contact matrix `.rds` (see `metadata(obj)[["windowsOut"]]`);
 ## otherwise the normalized matrix stored in the object is used.
-##Here we just use the example object.
+## Here we just use the example object.
 obj <- loopQTLExampleData()
 ## You also need a gtf file input to give the genomic annotations.
 ## Here we provide an example gtf.
@@ -91,5 +91,6 @@ p <- loopQTLplotLocus(
     end = 46300000,
     snpID = "rs11584814",
     values = "cpm",
-    gtf = gtfPath)
+    gtf = gtfPath
+)
 }

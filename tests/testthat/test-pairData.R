@@ -2,7 +2,7 @@ test_that("loopQTLpairData() returns per-sample rows for a valid pair", {
     obj <- loopQTLExampleData()
 
     loopID_ <- obj@results$loopID[1]
-    snpID_  <- obj@results$snpID[1]
+    snpID_ <- obj@results$snpID[1]
 
     pair <- loopQTLpairData(obj, loopID = loopID_, snpID = snpID_)
 
