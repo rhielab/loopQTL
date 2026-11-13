@@ -21,7 +21,8 @@
 #' obj <- loopQTLExampleData()
 #' ##Check results so that you can choose your interested loopID and snpID
 #' head(results(obj))
-#' ##Then you can specify the specifi SNP-loop pair data you want to plot as classical QTL box plot.
+#' ## Then you can specify the specific SNP-loop pair data you want to
+#' ## plot as a classical QTL box plot.
 #' ##Return is a ggplot object so you can save with ggsave().
 #' p <- loopQTLplotPair(
 #'     obj,
@@ -34,14 +35,14 @@ loopQTLplotPair <- function(obj, loopID, snpID, normal = TRUE, jitter = TRUE) {
         is.character(snpID),  length(snpID) == 1
     )
     if (nrow(obj@results) == 0) {
-        .stopNoCall("obj@results is empty. Run runQTL(obj) first.")
+        .stopNoCall("results(obj) is empty. Run runQTL(obj) first.")
     }
 
     ## Look up the (loop, SNP) row in obj@results for stats
     hit <- obj@results[obj@results$loopID == loopID &
         obj@results$snpID == snpID, , drop = FALSE]
     if (nrow(hit) == 0) {
-        .stopNoCall("(loopID, snpID) pair not found in obj@results")
+        .stopNoCall("(loopID, snpID) pair not found in results(obj)")
     }
     hit <- hit[1, , drop = FALSE]
     ref <- hit$ref
@@ -54,10 +55,14 @@ loopQTLplotPair <- function(obj, loopID, snpID, normal = TRUE, jitter = TRUE) {
 
     ## Pull per-sample pair data
     d <- loopQTLpairData(obj, loopID, snpID, normal = normal)
-    d$genotypeFactor <- factor(d$genotype, levels = c(0, 1, 2), labels = genotypeLabels)
+    d$genotypeFactor <- factor(
+        d$genotype, levels = c(0, 1, 2), labels = genotypeLabels
+    )
     d <- d[!is.na(d$genotypeFactor) & !is.na(d$phenotype), , drop = FALSE]
     if (nrow(d) == 0) {
-        .stopNoCall("No samples have non-NA genotype and phenotype for this pair.")
+        .stopNoCall(
+            "No samples have non-NA genotype and phenotype for this pair."
+        )
     }
 
     ## Per-genotype sample counts for x-tick subtitles
@@ -69,9 +74,15 @@ loopQTLplotPair <- function(obj, loopID, snpID, normal = TRUE, jitter = TRUE) {
         "REF=%s   ALT=%s   |   p = %.3g   |   beta = %.3g",
         ref, alt, hit$p, hit$beta
     )
-    yLabel <- if (normal) "Loop phenotype (RINT)" else "Loop phenotype (normalized)"
+    yLabel <- if (normal) {
+        "Loop phenotype (RINT)"
+    } else {
+        "Loop phenotype (normalized)"
+    }
 
-    p <- ggplot2::ggplot(d, ggplot2::aes(.data$genotypeFactor, .data$phenotype)) +
+    p <- ggplot2::ggplot(
+        d, ggplot2::aes(.data$genotypeFactor, .data$phenotype)
+    ) +
         ggplot2::geom_boxplot(
             fill = "lightgray", outlier.size = 0.8,
             width = 0.5

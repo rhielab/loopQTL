@@ -34,7 +34,8 @@ loopQTLplotLocus(
 
 \item{gtf}{Path to a GTF file.}
 
-\item{pThreshold}{Nominal p-value cutoff for "significant" loops. Default \code{0.05}.}
+\item{pThreshold}{Nominal p-value cutoff for "significant" loops. Default
+\code{0.05}.}
 
 \item{values}{Which contact-strength matrix to color arcs by:
 \describe{
@@ -75,11 +76,12 @@ a user-specified region. Please note that to use \code{values = "cpm"} or
 ## Load the example object. In real analysis, the input
 ## should be the output of runQTL().
 ## If you specify `values = "cpm"` or `values = "raw"`, the object must
-## carry the contact matrix `.rds` (see `obj@metadata$windowsOut`);
+## carry the contact matrix `.rds` (see `metadata(obj)[["windowsOut"]]`);
 ## otherwise the normalized matrix stored in the object is used.
 ##Here we just use the example object.
 obj <- loopQTLExampleData()
-##You also need a gtf file input to give the genomic annotations. Here we provide an example gtf.
+## You also need a gtf file input to give the genomic annotations.
+## Here we provide an example gtf.
 gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
 ## Return is a ggplot object so you can ggsave() to output.
 p <- loopQTLplotLocus(

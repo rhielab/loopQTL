@@ -5,7 +5,8 @@
 #' regression. This function returns a list with the chosen K and the
 #' sample × K matrix of PCs.
 #'
-#' @param obj A loopQTL object with `phenotype` matrix filled by `loopQTLnormalize()`.
+#' @param obj A loopQTL object with `phenotype` matrix filled by
+#'   `loopQTLnormalize()`.
 #' @param Kmethod `"elbow"` (default) or `"BE"`.
 #' @param normal Apply RINT per loop before PCA. Default `TRUE`.
 #' @param Kmax The maximum number of PCs returned. Default
@@ -24,11 +25,13 @@
 #' obj <- loopQTLExampleData()
 #' Kres <- loopQTLchooseK(obj, Kmethod = "elbow")
 #' Kres$K
-loopQTLchooseK <- function(obj,
-                           Kmethod = c("elbow", "BE"),
-                           normal = TRUE,
-                           Kmax = NULL,
-                           ...) {
+loopQTLchooseK <- function(
+    obj,
+    Kmethod = c("elbow", "BE"),
+    normal = TRUE,
+    Kmax = NULL,
+    ...
+) {
     stopifnot(
         methods::is(obj, "loopQTL"),
         length(obj@phenotype) > 0
@@ -50,11 +53,13 @@ loopQTLchooseK <- function(obj,
 ## Internal: PCA + K selection on a (loops x samples) matrix. Shared by
 ## loopQTLchooseK() and runQTL() (so we don't RINT twice when runQTL
 ## already RINT'd the matrix it's passing).
-.pca_for_qtl <- function(Y,
-                         samples,
-                         Kmethod = c("elbow", "BE"),
-                         Kmax = NULL,
-                         ...) {
+.pca_for_qtl <- function(
+    Y,
+    samples,
+    Kmethod = c("elbow", "BE"),
+    Kmax = NULL,
+    ...
+) {
     Kmethod <- match.arg(Kmethod)
     if (is.null(Kmax)) Kmax <- max(1, length(samples) - 2)
     Kmax <- as.integer(Kmax)
@@ -68,7 +73,7 @@ loopQTLchooseK <- function(obj,
 
     Kraw <- switch(Kmethod,
         elbow = .PCAForQTLrunElbow(prcompResult = pcaResults, ...),
-        BE    = .PCAForQTLrunBE(prcompResult = pcaResults, ...)
+        BE    = .PCAForQTLrunBE(X = Yt, ...)$numOfPCsChosen
     )
     Kraw <- as.integer(Kraw)
     if (is.na(Kraw) || Kraw < 1) Kraw <- 1
@@ -76,10 +81,11 @@ loopQTLchooseK <- function(obj,
 
     K <- min(Kraw, Kmax)
     if (K < Kraw) {
-        message(sprintf(
-            "PCAForQTL %s chose K = %d, capped to Kmax = %d (nSamples - 2 leaves df for intercept + genotype).",
-            Kmethod, Kraw, K
-        ))
+        fmt <- paste0(
+            "PCAForQTL %s chose K = %d, capped to Kmax = %d ",
+            "(nSamples - 2 leaves df for intercept + genotype)."
+        )
+        message(sprintf(fmt, Kmethod, Kraw, K))
     }
 
     PCs <- pcaResults$x[, seq_len(K), drop = FALSE]

@@ -13,7 +13,12 @@
 ## unless mc.cores is 1) and set the seed before using this function.
 
 .PCAForQTLrunBE <- function(X, B = 20, alpha = 0.05,
-                            mc.cores = max(1, min(B, BiocParallel::bpnworkers(BiocParallel::MulticoreParam()) - 1))) {
+                            mc.cores = max(1, min(
+                                B,
+                                BiocParallel::bpnworkers(
+                                    BiocParallel::MulticoreParam()
+                                ) - 1
+                            ))) {
     if (alpha < 0 || alpha > 1) {
         .stopNoCall("alpha must be between 0 and 1.")
     }
@@ -55,6 +60,10 @@
     }
 
     numOfPCsChosen <- sum(pValues <= alpha)
-    toReturn <- list(pValues = pValues, alpha = alpha, numOfPCsChosen = numOfPCsChosen)
+    toReturn <- list(
+        pValues = pValues,
+        alpha = alpha,
+        numOfPCsChosen = numOfPCsChosen
+    )
     return(toReturn)
 }

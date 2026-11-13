@@ -11,7 +11,9 @@
 ## PMC9552461.).
 .PCAForQTLrunElbow <- function(prcompResult) {
     if (!isa(prcompResult, "prcomp")) {
-        .stopNoCall("prcompResult must be a prcomp object returned by the function prcomp().")
+        .stopNoCall(
+            "prcompResult must be a prcomp object returned by prcomp()."
+        )
     }
 
     importanceTable <- summary(prcompResult)$importance
@@ -29,7 +31,10 @@
     diagonalLineHeight <- diagonalLineEndY - diagonalLineStartY
 
     diagonalLineLength <- sqrt(diagonalLineWidth^2 + diagonalLineHeight^2)
-    distancesNumerator <- abs(diagonalLineWidth * (diagonalLineStartY - y) - (diagonalLineStartX - x) * diagonalLineHeight)
+    distancesNumerator <- abs(
+        diagonalLineWidth * (diagonalLineStartY - y) -
+            (diagonalLineStartX - x) * diagonalLineHeight
+    )
     distances <- distancesNumerator / diagonalLineLength
 
     numOfPCsChosen <- unname(which.max(distances))

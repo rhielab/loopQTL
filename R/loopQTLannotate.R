@@ -1,7 +1,7 @@
 #' Annotate loopQTL results with target genes and regulatory peaks
 #'
-#' This function annotates SNP-loop QTL results with target genes, optional peak overlap,
-#' and a SNP-loop Type classification.
+#' This function annotates SNP-loop QTL results with target genes, optional peak
+#' overlap, and a SNP-loop Type classification.
 #'
 #' Adds three columns to `results(obj)`:
 #' \describe{
@@ -13,13 +13,15 @@
 #'     before this overlap check (so promoter-like peaks don't count).}
 #'   \item{`Type`}{One of:
 #'     \itemize{
-#'       \item `"WithinTSS"` - SNP overlaps any gene's TSS (± `TSSwindow`).
+#'       \item `"WithinTSS"` - SNP overlaps any gene's TSS (+/- `TSSwindow`).
 #'         Short-circuits all other annotation when `removeTSS = TRUE`.
-#'       \item `"rs-gene"` - SNP not in TSS, has a target gene at the partner anchor.
+#'       \item `"rs-gene"` - SNP not in TSS, has a target gene at the
+#'         partner anchor.
 #'       \item `"rs-<peakAnnotation>"` - SNP not in TSS, no gene at partner,
 #'         but partner anchor overlaps a peak (only when `peak` is supplied).
 #'         e.g. `"rs-Enhancer"`.
-#'       \item `"rs-O"` - SNP not in TSS, no gene AND no peak at the partner anchor.
+#'       \item `"rs-O"` - SNP not in TSS, no gene AND no peak at the
+#'         partner anchor.
 #'       \item `"rs(<peakAnnotation>)-gene"` - additionally overlaps a peak
 #'         (only when `peak` is supplied), has a target gene. e.g.
 #'         `"rs(Enhancer)-gene"`.
@@ -29,21 +31,24 @@
 #'       \item `"rs(<peakAnnotation>)-O"` - overlaps a peak but no target gene
 #'         and no peak at partner.
 #'     }
-#'     If both promtoer and peaks are found at the target anchor, it give priority on genes.
+#'     If both promoter and peaks are found at the target anchor, it gives
+#'     priority to genes.
 #'   }
 #' }
 #'
 #' @param obj A loopQTL object with `results(obj)` filled by `runQTL()`.
 #' @param gtf Path to a GTF file with `gene` entries.
-#' @param peak Optional path to a peak  bed file. If supplied, an extra `peak` column
-#'   is added and the `Type` labels gain the `"rs(<peakAnnotation>)-..."` annotations.
-#' @param TSSwindow Base-pair window flank around each gene's TSS to define promoters. Default 2000.
-#' @param anchorWindow Base-pair window flank added around each anchor when looking for
-#'   overlapping promoters and peaks. Default 5000.
+#' @param peak Optional path to a peak bed file. If supplied, an extra `peak`
+#'   column is added and the `Type` labels gain the `"rs(<peakAnnotation>)-..."`
+#'   annotations.
+#' @param TSSwindow Base-pair window flank around each gene's TSS to define
+#'   promoters. Default 2000.
+#' @param anchorWindow Base-pair window flank added around each anchor when
+#'   looking for overlapping promoters and peaks. Default 5000.
 #' @param peakAnnotation Character label substituted into the `Type` values
 #'   when `peak` is supplied. Default `"Peak"`. (e.g "Enhancer" or "H3K27ac")
-#' @param removeTSS Logical; default `TRUE`. When `TRUE`, a TSS-based filtering on peaks will be
-#' done to get the distal peak elements.
+#' @param removeTSS Logical; default `TRUE`. When `TRUE`, a TSS-based filtering
+#'   on peaks will be done to get the distal peak elements.
 #'
 #' @return The input `obj` with `results(obj)` augmented by `gene`, `peak`
 #'   (when applicable), and `Type` columns.
@@ -89,7 +94,7 @@ loopQTLannotate <- function(obj,
         stopifnot(is.character(peak), length(peak) == 1, file.exists(peak))
     }
     if (nrow(obj@results) == 0) {
-        .stopNoCall("obj@results is empty. Run runQTL(obj) first.")
+        .stopNoCall("results(obj) is empty. Run runQTL(obj) first.")
     }
 
     TSSwindow <- as.integer(TSSwindow)
@@ -106,7 +111,10 @@ loopQTLannotate <- function(obj,
         NULL
     }
     if (is.null(typeCol)) {
-        .stopNoCall("GTF has neither `type` nor `feature` column; cannot find gene entries")
+        .stopNoCall(
+            "GTF has neither `type` nor `feature` column; ",
+            "cannot find gene entries"
+        )
     }
     geneGRanges <- gtfGRanges[S4Vectors::mcols(gtfGRanges)[[typeCol]] == "gene"]
     if (length(geneGRanges) == 0) {
@@ -141,11 +149,12 @@ loopQTLannotate <- function(obj,
         )
     )
     S4Vectors::mcols(tssRegions)$gene <- geneNames
-    message(length(tssRegions), " gene TSS regions (±", TSSwindow, " bp)")
+    message(length(tssRegions), " gene TSS regions (\u00b1", TSSwindow, " bp)")
 
-    ## 2. Chrom-naming normalizer for THIS GTF  # GTF may use "chr1" (GENCODE) or "1" (Ensembl); loop anchors may use
-    ## either depending on the BEDPE caller (Mustache uses "1"). Build a
-    ## function that converts any chrom string to whatever the GTF uses.
+    ## 2. Chrom-naming normalizer for THIS GTF # GTF may use "chr1" (GENCODE) or
+    ## "1" (Ensembl); loop anchors may use either depending on the BEDPE caller
+    ## (Mustache uses "1"). Build a function that converts any chrom string to
+    ## whatever the GTF uses.
     gtfChroms <- unique(as.character(GenomicRanges::seqnames(tssRegions)))
     gtf_uses_chr <- any(grepl("^chr", gtfChroms))
     normalizeChrom <- function(x) {
@@ -163,7 +172,9 @@ loopQTLannotate <- function(obj,
         message("reading peaks: ", peak)
         peaksGRanges <- rtracklayer::import(peak)
         ## Normalize peak chroms to GTF style so overlap actually works.
-        peak_chroms_norm <- normalizeChrom(GenomicRanges::seqnames(peaksGRanges))
+        peak_chroms_norm <- normalizeChrom(
+            GenomicRanges::seqnames(peaksGRanges)
+        )
         peaksGRanges <- GenomicRanges::GRanges(
             seqnames = peak_chroms_norm,
             ranges   = IRanges::ranges(peaksGRanges)
@@ -183,10 +194,11 @@ loopQTLannotate <- function(obj,
         }
     }
 
-    ## 4. Per-loop gene lists at anchor A and anchor B  # Critical: normalize anchor seqnames to the GTF's convention BEFORE
-    ## findOverlaps. Without this, anchor seqnames like "1" silently fail to
-    ## match TSS seqnames like "chr1", producing zero gene assignments. (This
-    ## was the cause of the original "no rs-gene at all" bug.)
+    ## 4. Per-loop gene lists at anchor A and anchor B # Critical: normalize
+    ## anchor seqnames to the GTF's convention BEFORE findOverlaps. Without
+    ## this, anchor seqnames like "1" silently fail to match TSS seqnames like
+    ## "chr1", producing zero gene assignments. (This was the cause of the
+    ## original "no rs-gene at all" bug.)
     loopsGInteractions <- obj@loops
     loop_ids_all <- S4Vectors::mcols(loopsGInteractions)$loopID
     anchorA <- InteractionSet::anchors(loopsGInteractions, type = "first")
@@ -204,7 +216,8 @@ loopQTLannotate <- function(obj,
     paddedA <- padAnchor(anchorA)
     paddedB <- padAnchor(anchorB)
 
-    ## Anchor-side gene assignments (length = nLoops; one character vector per loop)
+    ## Anchor-side gene assignments (length = nLoops; one character vector per
+    ## loop)
     build_gene_lists <- function(padded) {
         hits <- GenomicRanges::findOverlaps(padded, tssRegions)
         out <- vector("list", length(padded))
@@ -269,7 +282,9 @@ loopQTLannotate <- function(obj,
             g <- genes_at_B[[li]]
         } else if (anc == "B") {
             g <- genes_at_A[[li]]
-        } else if (anc == "both") g <- unique(c(genes_at_A[[li]], genes_at_B[[li]]))
+        } else if (anc == "both") {
+            g <- unique(c(genes_at_A[[li]], genes_at_B[[li]]))
+        }
         partnerGenes[[i]] <- if (is.null(g)) character(0) else g
         if (!is.null(peak_at_A)) {
             partner_has_peak[i] <-

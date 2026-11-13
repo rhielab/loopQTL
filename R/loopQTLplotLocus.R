@@ -13,7 +13,8 @@
 #' @param start The start genomic coordinate in bp for the x-axis.
 #' @param end The end genomic coordinate in bp for the x-axis.
 #' @param gtf Path to a GTF file.
-#' @param pThreshold Nominal p-value cutoff for "significant" loops. Default `0.05`.
+#' @param pThreshold Nominal p-value cutoff for "significant" loops. Default
+#'   `0.05`.
 #' @param values Which contact-strength matrix to color arcs by:
 #'   \describe{
 #'     \item{`"normalized"`}{Default. The matrix from `phenotype(obj)`.
@@ -40,11 +41,12 @@
 #' ## Load the example object. In real analysis, the input
 #' ## should be the output of runQTL().
 #' ## If you specify `values = "cpm"` or `values = "raw"`, the object must
-#' ## carry the contact matrix `.rds` (see `obj@metadata$windowsOut`);
+#' ## carry the contact matrix `.rds` (see `metadata(obj)[["windowsOut"]]`);
 #' ## otherwise the normalized matrix stored in the object is used.
 #' ##Here we just use the example object.
 #' obj <- loopQTLExampleData()
-#' ##You also need a gtf file input to give the genomic annotations. Here we provide an example gtf.
+#' ## You also need a gtf file input to give the genomic annotations.
+#' ## Here we provide an example gtf.
 #' gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
 #' ## Return is a ggplot object so you can ggsave() to output.
 #' p <- loopQTLplotLocus(
@@ -55,17 +57,19 @@
 #'     snpID = "rs11584814",
 #'     values = "cpm",
 #'     gtf = gtfPath)
-loopQTLplotLocus <- function(obj, snpID,
-                             chrom, start, end,
-                             gtf,
-                             pThreshold = 0.05,
-                             values = c("normalized", "cpm", "raw"),
-                             windows = NULL,
-                             strongColor = "#FF7917",
-                             weakColor = "grey90",
-                             limit = NULL,
-                             geneBiotypes = "protein_coding",
-                             axisUnit = c("Mb", "bp")) {
+loopQTLplotLocus <- function(
+    obj, snpID,
+    chrom, start, end,
+    gtf,
+    pThreshold = 0.05,
+    values = c("normalized", "cpm", "raw"),
+    windows = NULL,
+    strongColor = "#FF7917",
+    weakColor = "grey90",
+    limit = NULL,
+    geneBiotypes = "protein_coding",
+    axisUnit = c("Mb", "bp")
+) {
     stopifnot(
         methods::is(obj, "loopQTL"),
         is.character(snpID), length(snpID) == 1, nzchar(snpID),
@@ -79,32 +83,35 @@ loopQTLplotLocus <- function(obj, snpID,
     values <- match.arg(values)
     axisUnit <- match.arg(axisUnit)
     if (nrow(obj@results) == 0) {
-        .stopNoCall("obj@results is empty. Run runQTL(obj) first.")
+        .stopNoCall("results(obj) is empty. Run runQTL(obj) first.")
     }
 
     start <- as.integer(start)
     end <- as.integer(end)
 
-    ## 1. Filter obj@results to (this SNP, p <= threshold) and to loops in the region
+    ## 1. Filter obj@results to (this SNP, p <= threshold) and to loops in the
+    ## region
     resultsForThisSNP <- obj@results[obj@results$snpID == snpID, , drop = FALSE]
     if (nrow(resultsForThisSNP) == 0) {
-        .stopNoCall("SNP ", snpID, " not found in obj@results")
+        .stopNoCall("SNP ", snpID, " not found in results(obj)")
     }
     if (!identical(unique(as.character(resultsForThisSNP$chrom)), chrom)) {
         .stopNoCall(
             "Supplied chrom = '", chrom, "' does not match the SNP's chrom ('",
-            resultsForThisSNP$chrom[1], "') in obj@results"
+            resultsForThisSNP$chrom[1], "') in results(obj)"
         )
     }
     snpPos <- resultsForThisSNP$pos[1]
     snpRef <- resultsForThisSNP$ref[1]
     snpAlt <- resultsForThisSNP$alt[1]
 
-    significantResults <- resultsForThisSNP[resultsForThisSNP$p <= pThreshold & is.finite(resultsForThisSNP$p), ,
-        drop = FALSE
-    ]
+    sigMask <- resultsForThisSNP$p <= pThreshold &
+        is.finite(resultsForThisSNP$p)
+    significantResults <- resultsForThisSNP[sigMask, , drop = FALSE]
     if (nrow(significantResults) == 0) {
-        .stopNoCall("No significant (p <= ", pThreshold, ") loops for SNP ", snpID)
+        .stopNoCall(
+            "No significant (p <= ", pThreshold, ") loops for SNP ", snpID
+        )
     }
 
     ## Look up anchor coords for each significant loop; filter to region
@@ -235,7 +242,10 @@ loopQTLplotLocus <- function(obj, snpID,
                 snpID, chrom, start, end
             ),
             subtitle = sprintf(
-                "REF=%s  ALT=%s  |  %d significant loop(s) (p <= %.3g)  |  %s values",
+                paste0(
+                    "REF=%s  ALT=%s  |  %d significant loop(s) ",
+                    "(p <= %.3g)  |  %s values"
+                ),
                 snpRef, snpAlt, nrow(loopsDF),
                 pThreshold, values
             )
@@ -286,7 +296,9 @@ loopQTLplotLocus <- function(obj, snpID,
         rawVals <- w$cellsRaw[obj@samples, hit[1]]
         if (values == "cpm") {
             if (length(obj@cis) == 0) {
-                .stopNoCall("values = 'cpm' needs obj@cis (per-sample cis depth).")
+                .stopNoCall(
+                    "values = 'cpm' needs cis(obj) (per-sample cis depth)."
+                )
             }
             rawVals <- rawVals / (obj@cis[obj@samples] / 1000000)
         }
@@ -295,7 +307,8 @@ loopQTLplotLocus <- function(obj, snpID,
     out
 }
 
-## Read genes overlapping [start, end] on chrom from a GTF. Handles chr vs no-chr.
+## Read genes overlapping [start, end] on chrom from a GTF. Handles chr vs
+## no-chr.
 .load_genes_in_region <- function(gtf, chrom, start, end, biotypes) {
     gr <- rtracklayer::import(gtf)
     typeCol <- if ("type" %in% names(S4Vectors::mcols(gr))) {
@@ -320,8 +333,10 @@ loopQTLplotLocus <- function(obj, snpID,
         GenomicRanges::end(genes) >= start &
         GenomicRanges::start(genes) <= end
     genes <- genes[keep]
-    if (!is.null(biotypes) && "gene_biotype" %in% names(S4Vectors::mcols(genes))) {
-        genes <- genes[as.character(S4Vectors::mcols(genes)$gene_biotype) %in% biotypes]
+    hasBiotypeCol <- "gene_biotype" %in% names(S4Vectors::mcols(genes))
+    if (!is.null(biotypes) && hasBiotypeCol) {
+        biotypeVals <- as.character(S4Vectors::mcols(genes)$gene_biotype)
+        genes <- genes[biotypeVals %in% biotypes]
     }
 
     nameCol <- if ("gene_name" %in% names(S4Vectors::mcols(genes))) {
@@ -414,7 +429,8 @@ loopQTLplotLocus <- function(obj, snpID,
     )
 }
 
-## Non-overlapping row assignment: greedy first-fit into rows so text labels don't collide.
+## Non-overlapping row assignment: greedy first-fit into rows so text labels
+## don't collide.
 .assign_gene_rows <- function(gDF) {
     n <- nrow(gDF)
     if (n == 0) {
@@ -447,7 +463,9 @@ loopQTLplotLocus <- function(obj, snpID,
             ggplot2::ggplot() +
                 ggplot2::geom_blank() +
                 ggplot2::coord_cartesian(xlim = c(start, end)) +
-                ggplot2::scale_x_continuous(labels = axisFormat, expand = c(0, 0)) +
+                ggplot2::scale_x_continuous(
+                    labels = axisFormat, expand = c(0, 0)
+                ) +
                 ggplot2::labs(y = "Genes") +
                 ggplot2::theme_classic(base_size = 10) +
                 ggplot2::theme(
@@ -596,9 +614,11 @@ loopQTLplotLocus <- function(obj, snpID,
     ))
 }
 
-.build_arc_panel <- function(arcDF, start, end, axisFormat,
-                             effLo, effHi, strongColor, weakColor,
-                             panelTitle, showX = FALSE) {
+.build_arc_panel <- function(
+    arcDF, start, end, axisFormat,
+    effLo, effHi, strongColor, weakColor,
+    panelTitle, showX = FALSE
+) {
     ## Expand each arc into a path of points
     paths <- do.call(rbind, lapply(seq_len(nrow(arcDF)), function(i) {
         p <- .arcPath(arcDF$x1[i], arcDF$x2[i])
@@ -633,7 +653,8 @@ loopQTLplotLocus <- function(obj, snpID,
             axis.title.y = ggplot2::element_text(size = 9),
             panel.grid = ggplot2::element_blank()
         )
-    ## X-axis ruler is on top of the gene track (IGV-style); always hide it here.
+    ## X-axis ruler is on top of the gene track (IGV-style); always hide it
+    ## here.
     gg + ggplot2::theme(
         axis.text.x = ggplot2::element_blank(),
         axis.ticks.x = ggplot2::element_blank(),

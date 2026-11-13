@@ -37,15 +37,16 @@ the SNP's chrom in the windows file.}
 
 \item{end}{Optional End genomic position in bp to crop the heatmap to.}
 
-\item{windows}{Either \code{NULL} (default, loads from \code{metadata(obj)$windowsOut}),
-a path to a windows \code{.rds}, or the loaded list.}
+\item{windows}{Either \code{NULL} (default, loads from
+\code{metadata(obj)$windowsOut}), a path to a windows \code{.rds}, or the loaded
+list.}
 
 \item{mirror}{Logical; mirror the upper-triangle beta values to the
 lower triangle so the heatmap is symmetric. Default \code{TRUE}.}
 
 \item{minSamplesPerCell}{Minimum usable (non-NA dose + complete covariates)
-samples required to fit the regression for a given cell. Cells with fewer samples
-are returned NA. Default 3.}
+samples required to fit the regression for a given cell. Cells with fewer
+samples are returned NA. Default 3.}
 
 \item{normal}{Apply Rank-based Inverse Normal Transformation (RINT) per
 cell across samples before fitting. Matches the \code{normal = TRUE}
@@ -74,18 +75,21 @@ covariate set.}
 \verb{+/-limit} are limited to the deepest color. Default
 \code{NULL}) in the cropped view.}
 
-\item{palette}{RColorBrewer palette name for the color pattern in the heatmap. Default \code{"RdBu"}.}
+\item{palette}{RColorBrewer palette name for the color pattern in the
+heatmap. Default \code{"RdBu"}.}
 
 \item{metric}{What to render per cell:
 \describe{
-\item{\code{"betaLogp"}}{Default. Use raw * -log10(p) values to plot, this consider both beta
-and significane of the regression analysis.}
+\item{\code{"betaLogp"}}{Default. Use raw * -log10(p) values to plot,
+this considers both beta and significance of the regression
+analysis.}
 \item{\code{"beta"}}{Use raw beta values to plot.}
 }}
 
 \item{values}{Which cell values to run the regression on:
 \describe{
-\item{\code{"normalized"}}{Default. Use the phenotype(obj) to perform the regression}
+\item{\code{"normalized"}}{Default. Use the phenotype(obj) to perform
+the regression}
 \item{\code{"cpm"}}{Use counts per million matrix to perform the regression.}
 \item{\code{"raw"}}{Use raw straw counts to perform the regression}
 }}
@@ -106,11 +110,11 @@ used in \code{runQTL()}.
 \examples{
 ## Load the example object. In real analysis, the input
 ## should be the output of runQTL().
-##Also please note that this function requires the object to have the contact matrix `rda` file. 
-##Check `obj@windowsOut` to see if your object contains this file.
-##Here we just use the example object.
+## Note: this function requires the object to have the contact matrix
+## `.rds` file. Check `metadata(obj)[["windowsOut"]]` to see if your object
+## contains this file. Here we just use the example object.
 obj <- loopQTLExampleData()
-##Check the results to see if you have any interested SNPs that you want to plot on.
+## Check the results to see which SNPs are of interest for plotting.
 head(results(obj))
 p <- loopQTLplotSnpWindow(
     obj,

@@ -7,10 +7,12 @@
 #' @param obj A loopQTL object with `results(obj)` filled.
 #' @param loopID Character vector of loopIDs to extract.
 #' @param snpID Character vector of snpIds to extract.
-#' @param normal Apply RINT per loop before returning phenotype values. default `TRUE`.
+#' @param normal Apply RINT per loop before returning phenotype values. default
+#'   `TRUE`.
 #'
-#' @return data.frame with columns `sample`, `loopID`, `snpID`, `genotype`
-#'   (0 - Reference homozygou; 1 - heterozygous, 2 - Alternative homozygous), `phenotype`, `cis`.
+#' @return data.frame with columns `sample`, `loopID`, `snpID`, `genotype` (0 -
+#'   Reference homozygou; 1 - heterozygous, 2 - Alternative homozygous),
+#'   `phenotype`, `cis`.
 #'
 #' @export
 #' @examples
@@ -20,7 +22,8 @@
 #' obj <- loopQTLExampleData()
 #' ##Check results so that you can choose your interested loopID and snpID
 #' head(results(obj))
-#' ##Then you can specify the specifi SNP-loop pair data you want to check at samples level.
+#' ## Then you can specify the specific SNP-loop pair data you want to
+#' ## check at samples level.
 #' pair <- loopQTLpairData(
 #'     obj,
 #'     loopID = "L0000187_chr1_46030000_46220000",
@@ -34,18 +37,26 @@ loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {
         is.logical(normal), length(normal) == 1
     )
     if (nrow(obj@results) == 0) {
-        .stopNoCall("obj@results is empty. Run runQTL(obj) first to populate it.")
+        .stopNoCall(
+            "results(obj) is empty. Run runQTL(obj) first to populate it."
+        )
     }
 
     loop_ids_all <- S4Vectors::mcols(obj@loops)$loopID
     missingLoops <- setdiff(loopID, loop_ids_all)
     if (length(missingLoops) > 0) {
-        .stopNoCall("loopID(s) not in obj@loops: ", paste(missingLoops, collapse = ", "))
+        .stopNoCall(
+            "loopID(s) not in loops(obj): ",
+            paste(missingLoops, collapse = ", ")
+        )
     }
 
     missingSNPs <- setdiff(snpID, obj@results$snpID)
     if (length(missingSNPs) > 0) {
-        .stopNoCall("snpID(s) not in obj@results: ", paste(missingSNPs, collapse = ", "))
+        .stopNoCall(
+            "snpID(s) not in results(obj): ",
+            paste(missingSNPs, collapse = ", ")
+        )
     }
 
     ## SNP info from obj@results (positions + ref/alt)
@@ -56,7 +67,8 @@ loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {
     ])
     snpInfo <- snpInfo[match(snpID, snpInfo$snpID), , drop = FALSE]
 
-    ## Genotypes via targeted tabix read  # Normalize chrom naming to whatever the VCF uses.
+    ## Genotypes via targeted tabix read # Normalize chrom naming to whatever
+    ## the VCF uses.
     tab <- Rsamtools::TabixFile(obj@vcfPath)
     vcfChroms <- Rsamtools::headerTabix(tab)$seqnames
     vcfChromNormalizerFunc <- .make_chrom_normalizer(vcfChroms)
@@ -68,7 +80,10 @@ loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {
     param <- VariantAnnotation::ScanVcfParam(
         which = whichGR, geno = "GT", info = NA_character_
     )
-    vcf <- VariantAnnotation::readVcf(obj@vcfPath, genome = "unknown", param = param)
+    vcf <- VariantAnnotation::readVcf(
+        obj@vcfPath,
+        genome = "unknown", param = param
+    )
 
     rr <- SummarizedExperiment::rowRanges(vcf)
     vcfChrom <- as.character(GenomicRanges::seqnames(rr))
@@ -115,7 +130,11 @@ loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {
         snpIdx = seq_along(snpID),
         KEEP.OUT.ATTRS = FALSE
     )
-    cisVec <- if (length(obj@cis) > 0) obj@cis[obj@samples] else rep(NA_real_, nSamples)
+    cisVec <- if (length(obj@cis) > 0) {
+        obj@cis[obj@samples]
+    } else {
+        rep(NA_real_, nSamples)
+    }
 
     out <- data.frame(
         sample = obj@samples[grid$sampleIdx],

@@ -19,27 +19,29 @@ loopQTLannotate(
 
 \item{gtf}{Path to a GTF file with \code{gene} entries.}
 
-\item{peak}{Optional path to a peak  bed file. If supplied, an extra \code{peak} column
-is added and the \code{Type} labels gain the \code{"rs(<peakAnnotation>)-..."} annotations.}
+\item{peak}{Optional path to a peak bed file. If supplied, an extra \code{peak}
+column is added and the \code{Type} labels gain the \code{"rs(<peakAnnotation>)-..."}
+annotations.}
 
-\item{TSSwindow}{Base-pair window flank around each gene's TSS to define promoters. Default 2000.}
+\item{TSSwindow}{Base-pair window flank around each gene's TSS to define
+promoters. Default 2000.}
 
-\item{anchorWindow}{Base-pair window flank added around each anchor when looking for
-overlapping promoters and peaks. Default 5000.}
+\item{anchorWindow}{Base-pair window flank added around each anchor when
+looking for overlapping promoters and peaks. Default 5000.}
 
 \item{peakAnnotation}{Character label substituted into the \code{Type} values
 when \code{peak} is supplied. Default \code{"Peak"}. (e.g "Enhancer" or "H3K27ac")}
 
-\item{removeTSS}{Logical; default \code{TRUE}. When \code{TRUE}, a TSS-based filtering on peaks will be
-done to get the distal peak elements.}
+\item{removeTSS}{Logical; default \code{TRUE}. When \code{TRUE}, a TSS-based filtering
+on peaks will be done to get the distal peak elements.}
 }
 \value{
 The input \code{obj} with \code{results(obj)} augmented by \code{gene}, \code{peak}
 (when applicable), and \code{Type} columns.
 }
 \description{
-This function annotates SNP-loop QTL results with target genes, optional peak overlap,
-and a SNP-loop Type classification.
+This function annotates SNP-loop QTL results with target genes, optional peak
+overlap, and a SNP-loop Type classification.
 }
 \details{
 Adds three columns to \code{results(obj)}:
@@ -52,13 +54,15 @@ overlaps any peak from the supplied peak file, \code{FALSE} otherwise. When
 before this overlap check (so promoter-like peaks don't count).}
 \item{\code{Type}}{One of:
 \itemize{
-\item \code{"WithinTSS"} - SNP overlaps any gene's TSS (± \code{TSSwindow}).
+\item \code{"WithinTSS"} - SNP overlaps any gene's TSS (+/- \code{TSSwindow}).
 Short-circuits all other annotation when \code{removeTSS = TRUE}.
-\item \code{"rs-gene"} - SNP not in TSS, has a target gene at the partner anchor.
+\item \code{"rs-gene"} - SNP not in TSS, has a target gene at the
+partner anchor.
 \item \code{"rs-<peakAnnotation>"} - SNP not in TSS, no gene at partner,
 but partner anchor overlaps a peak (only when \code{peak} is supplied).
 e.g. \code{"rs-Enhancer"}.
-\item \code{"rs-O"} - SNP not in TSS, no gene AND no peak at the partner anchor.
+\item \code{"rs-O"} - SNP not in TSS, no gene AND no peak at the
+partner anchor.
 \item \code{"rs(<peakAnnotation>)-gene"} - additionally overlaps a peak
 (only when \code{peak} is supplied), has a target gene. e.g.
 \code{"rs(Enhancer)-gene"}.
@@ -68,7 +72,8 @@ e.g. \code{"rs(Enhancer)-Enhancer"}.
 \item \code{"rs(<peakAnnotation>)-O"} - overlaps a peak but no target gene
 and no peak at partner.
 }
-If both promtoer and peaks are found at the target anchor, it give priority on genes.
+If both promoter and peaks are found at the target anchor, it gives
+priority to genes.
 }
 }
 }

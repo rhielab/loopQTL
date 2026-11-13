@@ -33,7 +33,8 @@ pair. It is returned as a ggplot object that can be saved with
 obj <- loopQTLExampleData()
 ##Check results so that you can choose your interested loopID and snpID
 head(results(obj))
-##Then you can specify the specifi SNP-loop pair data you want to plot as classical QTL box plot.
+## Then you can specify the specific SNP-loop pair data you want to
+## plot as a classical QTL box plot.
 ##Return is a ggplot object so you can save with ggsave().
 p <- loopQTLplotPair(
     obj,

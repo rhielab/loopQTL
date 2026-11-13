@@ -19,7 +19,8 @@ from the \code{.hic} files automatically.}
 
 \item{vcf}{Path to a VCF. The vcf should be bgzipped with tabix index.}
 
-\item{resolution}{a numeric bin size recognized in the .hic file (e.g. 10000).}
+\item{resolution}{a numeric bin size recognized in the .hic file (e.g.
+10000).}
 
 \item{minSamples}{The minimum number of samples supporting a consensus
 loop. Default is 2 samples.}
@@ -36,8 +37,8 @@ A \linkS4class{loopQTL} object with \code{samples}, \code{loops}, \code{vcfPath}
 \itemize{
 \item validates the input files header, including .vcf and .hic files;
 \item reads each per-sample BEDPE and builds a consensus loop set by
-exact-coordinate matching. Loops found fewer than \code{minSamples} samples will be
-dropped;
+exact-coordinate matching. Loops found fewer than \code{minSamples} samples will
+be dropped;
 \item Automatically computes per-sample cis-contact depth from the \code{.hic} files
 when the samplesheet lacks a \code{cis} column.
 }

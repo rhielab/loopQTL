@@ -22,17 +22,18 @@
     return(is.atomic(x) && length(x) == 1 && is.na(x))
 }
 
-## Bin a 1-based BEDPE-style anchor (start, end) to its analysis-bin start (0-based),
-## matching strawr's binning. straw returns bin starts as the lower coordinate of
-## the bin in 0-based half-open BP space, so bin = floor(midpoint / resolution) * resolution.
+## Bin a 1-based BEDPE-style anchor (start, end) to its analysis-bin start
+## (0-based), matching strawr's binning. straw returns bin starts as the lower
+## coordinate of the bin in 0-based half-open BP space, so bin = floor(midpoint
+## / resolution) * resolution.
 .binAnchor <- function(start, end, resolution) {
     mid <- (as.numeric(start) + as.numeric(end)) / 2
     as.integer(floor(mid / resolution) * resolution)
 }
 
 ## Detect strawr's chromosome naming style ("1" vs "chr1") from the .hic header.
-## Returns a function that maps a user-supplied chrom string (either style) to the
-## style this .hic expects.
+## Returns a function that maps a user-supplied chrom string (either style) to
+## the style this .hic expects.
 .make_chrom_normalizer <- function(hicChroms) {
     uses_chr_prefix <- any(grepl("^chr", hicChroms))
     function(x) {
@@ -97,8 +98,10 @@
 ##                      within-chrom row indices into cells_by_chrom[[chrom]]
 ##   )
 ## Returns NULL if no eligible SNPs are found (caller short-circuits).
-.compute_snp_windows <- function(vcfPath, anchorA, anchorB,
-                                 snpWindow, window, resolution) {
+.compute_snp_windows <- function(
+    vcfPath, anchorA, anchorB,
+    snpWindow, window, resolution
+) {
     if (!file.exists(vcfPath)) {
         .stopNoCall("VCF not found: ", vcfPath)
     }
@@ -114,7 +117,9 @@
     ## Build SNP target ranges = anchors padded by snpWindow
     pad <- function(gr) {
         GenomicRanges::GRanges(
-            seqnames = vcfChromNormalizerFunc(as.character(GenomicRanges::seqnames(gr))),
+            seqnames = vcfChromNormalizerFunc(
+                as.character(GenomicRanges::seqnames(gr))
+            ),
             ranges = IRanges::IRanges(
                 start = pmax(1, GenomicRanges::start(gr) - snpWindow),
                 end   = GenomicRanges::end(gr) + snpWindow
@@ -122,7 +127,8 @@
         )
     }
     targets <- GenomicRanges::reduce(c(pad(anchorA), pad(anchorB)))
-    targets <- targets[as.character(GenomicRanges::seqnames(targets)) %in% vcfChroms]
+    targetChroms <- as.character(GenomicRanges::seqnames(targets))
+    targets <- targets[targetChroms %in% vcfChroms]
     if (length(targets) == 0) {
         return(NULL)
     }
@@ -136,10 +142,12 @@
         geno = NA_character_,
         info = NA_character_
     )
-    vcf <- VariantAnnotation::readVcf(vcfPath, genome = "unknown", param = param)
+    vcf <- VariantAnnotation::readVcf(
+        vcfPath, genome = "unknown", param = param
+    )
     if (length(vcf) == 0) {
         warning(
-            "saveWindows: no SNPs in any anchor ± ",
+            "saveWindows: no SNPs in any anchor \u00b1 ",
             snpWindow, " bp window"
         )
         return(NULL)
@@ -159,10 +167,13 @@
         snpID <- sprintf("%s:%d_%s/%s", snp_chrom_vcf, snpPos, snpRef, snpAlt)
     }
 
-    ## Map SNPs to consensus loops (within snpWindow flank)  # Convert anchors to vcf-style seqnames for overlap with the SNP GRanges.
+    ## Map SNPs to consensus loops (within snpWindow flank) # Convert anchors to
+    ## vcf-style seqnames for overlap with the SNP GRanges.
     to_vcf_gr <- function(gr) {
         GenomicRanges::GRanges(
-            seqnames = vcfChromNormalizerFunc(as.character(GenomicRanges::seqnames(gr))),
+            seqnames = vcfChromNormalizerFunc(
+                as.character(GenomicRanges::seqnames(gr))
+            ),
             ranges = IRanges::IRanges(
                 start = pmax(1, GenomicRanges::start(gr) - snpWindow),
                 end   = GenomicRanges::end(gr) + snpWindow
@@ -181,15 +192,23 @@
     hitsB <- GenomicRanges::findOverlaps(snpGR, padded_B_vcf)
     in_loops_by_snp <- vector("list", length(snpGR))
     if (length(hitsA) > 0) {
-        spl <- split(S4Vectors::subjectHits(hitsA), S4Vectors::queryHits(hitsA))
+        spl <- split(
+            S4Vectors::subjectHits(hitsA),
+            S4Vectors::queryHits(hitsA)
+        )
         for (s in names(spl)) {
-            in_loops_by_snp[[as.integer(s)]] <- c(in_loops_by_snp[[as.integer(s)]], spl[[s]])
+            si <- as.integer(s)
+            in_loops_by_snp[[si]] <- c(in_loops_by_snp[[si]], spl[[s]])
         }
     }
     if (length(hitsB) > 0) {
-        spl <- split(S4Vectors::subjectHits(hitsB), S4Vectors::queryHits(hitsB))
+        spl <- split(
+            S4Vectors::subjectHits(hitsB),
+            S4Vectors::queryHits(hitsB)
+        )
         for (s in names(spl)) {
-            in_loops_by_snp[[as.integer(s)]] <- c(in_loops_by_snp[[as.integer(s)]], spl[[s]])
+            si <- as.integer(s)
+            in_loops_by_snp[[si]] <- c(in_loops_by_snp[[si]], spl[[s]])
         }
     }
     keepSNPs <- vapply(in_loops_by_snp, function(x) length(x) > 0, logical(1))
@@ -208,8 +227,8 @@
     snpRef <- snpRef[snp_idx_keep]
     snpAlt <- snpAlt[snp_idx_keep]
 
-    ## Native (anchor-style) chrom for output. Inverse of vcfChromNormalizerFunc is sample-specific;
-    ## use anchor seqnames at the SNP's chrom directly.
+    ## Native (anchor-style) chrom for output. Inverse of vcfChromNormalizerFunc
+    ## is sample-specific; use anchor seqnames at the SNP's chrom directly.
     anchor_chrom_native <- as.character(GenomicRanges::seqnames(anchorA))
     anchor_chrom_vcf <- vcfChromNormalizerFunc(anchor_chrom_native)
     snp_chrom_orig <- vapply(snp_chrom_vcf, function(cVcf) {
@@ -232,8 +251,12 @@
         li <- unique(in_loops_by_snp[[i]])
         nLoops[i] <- length(li)
         ## Bounding interval: SNP pos U all involved anchors (A and B)
-        starts <- c(snpPos[i], anchorA_start_native[li], anchorB_start_native[li])
-        ends <- c(snpPos[i], anchorA_end_native[li], anchorB_end_native[li])
+        starts <- c(
+            snpPos[i], anchorA_start_native[li], anchorB_start_native[li]
+        )
+        ends <- c(
+            snpPos[i], anchorA_end_native[li], anchorB_end_native[li]
+        )
         bLo <- min(starts)
         bHi <- max(ends)
         span <- bHi - bLo
@@ -261,8 +284,9 @@
         stringsAsFactors = FALSE
     )
 
-    ## Per-chrom dedup of cells  # cell = (binI, binJ) with binLo <= binI <= binJ <= binHi (upper tri).
-    ## Group SNPs by their native (anchor-style) chrom, since BNBC emits in that style.
+    ## Per-chrom dedup of cells # cell = (binI, binJ) with binLo <= binI <= binJ
+    ## <= binHi (upper tri). Group SNPs by their native (anchor-style) chrom,
+    ## since BNBC emits in that style.
     cells_by_chrom <- list()
     snp_cells_local <- vector("list", nSnp)
 
@@ -401,8 +425,9 @@ loopQTLExampleData <- function() {
     )
     if (!is.null(obj@metadata$hicPaths)) {
         obj@metadata$hicPaths <- setNames(
-            file.path(extdataDir, "example_hic",
-                      paste0(names(obj@metadata$hicPaths), ".hic")),
+            file.path(
+                extdataDir, "example_hic",
+                paste0(names(obj@metadata$hicPaths), ".hic")),
             names(obj@metadata$hicPaths)
         )
     }

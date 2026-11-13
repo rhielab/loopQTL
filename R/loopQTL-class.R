@@ -29,6 +29,26 @@
 #' @aliases samples loops cis vcfPath resolution phenotype results metadata
 #' @exportClass loopQTL
 #' @seealso loopQTLsetup
+#' @return
+#' The class constructor returns a `loopQTL` S4 object. The accessor methods
+#' return the following slot contents:
+#' \itemize{
+#'   \item `samples(obj)`: character vector of sample IDs.
+#'   \item `loops(obj)`: consensus loops as a [InteractionSet::GInteractions]
+#'     object.
+#'   \item `cis(obj)`: named numeric vector of per-sample cis-contact totals,
+#'     or `numeric(0)` if not set.
+#'   \item `vcfPath(obj)`: path to the tabix-indexed VCF, or `NA_character_`.
+#'   \item `resolution(obj)`: analysis bin size (bp) as an integer.
+#'   \item `phenotype(obj)`: numeric matrix of normalized per-loop phenotype
+#'     values (loops x samples), or an empty matrix before
+#'     `loopQTLnormalize()` has been run.
+#'   \item `results(obj)`: data.frame of QTL results, or an empty
+#'     data.frame before `runQTL()` has been run.
+#'   \item `metadata(obj)`: list of per-function metadata.
+#'   \item `show(obj)`: called for its side effect of printing a summary of
+#'     the object; returns `NULL` invisibly.
+#' }
 #' @examples
 #' obj <- loopQTLExampleData()
 #' obj

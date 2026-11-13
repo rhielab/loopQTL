@@ -13,7 +13,8 @@ loopQTLchooseK(
 )
 }
 \arguments{
-\item{obj}{A loopQTL object with \code{phenotype} matrix filled by \code{loopQTLnormalize()}.}
+\item{obj}{A loopQTL object with \code{phenotype} matrix filled by
+\code{loopQTLnormalize()}.}
 
 \item{Kmethod}{\code{"elbow"} (default) or \code{"BE"}.}
 

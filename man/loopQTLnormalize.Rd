@@ -28,8 +28,8 @@ file the per-SNP windows are written to.}
 \item{window}{Minimum window extent in bp around each in-loop SNP to
 create \code{.rds} file when \code{saveWindows = TRUE}. Default 1000000.}
 
-\item{snpWindow}{Base-pair window flank added to each consensus anchor when selecting
-in-loop SNPs. Default 0.}
+\item{snpWindow}{Base-pair window flank added to each consensus anchor when
+selecting in-loop SNPs. Default 0.}
 }
 \value{
 The loopQTL \code{obj} with \code{phenotype(obj)} filled.

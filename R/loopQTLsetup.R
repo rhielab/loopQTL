@@ -1,10 +1,10 @@
 #' Validate inputs and build loopQTL object
 #'
-#'* validates the input files header, including .vcf and .hic files;
-#'* reads each per-sample BEDPE and builds a consensus loop set by
-#'  exact-coordinate matching. Loops found fewer than `minSamples` samples will be
-#'  dropped;
-#'* Automatically computes per-sample cis-contact depth from the `.hic` files
+#' * validates the input files header, including .vcf and .hic files;
+#' * reads each per-sample BEDPE and builds a consensus loop set by
+#'   exact-coordinate matching. Loops found fewer than `minSamples` samples will
+#'   be dropped;
+#' * Automatically computes per-sample cis-contact depth from the `.hic` files
 #'  when the samplesheet lacks a `cis` column.
 #'
 #' The samplesheet is a tab-separated file with columns `Sample`, `hic`,
@@ -14,7 +14,8 @@
 #'   Optional `cis` column. If the `cis` column is absent, it is calculated
 #'   from the `.hic` files automatically.
 #' @param vcf Path to a VCF. The vcf should be bgzipped with tabix index.
-#' @param resolution a numeric bin size recognized in the .hic file (e.g. 10000).
+#' @param resolution a numeric bin size recognized in the .hic file (e.g.
+#'   10000).
 #' @param minSamples The minimum number of samples supporting a consensus
 #'   loop. Default is 2 samples.
 #' @param BPPARAM A [BiocParallel::BiocParallelParam] that parallelizes the
@@ -49,11 +50,13 @@
 #'     vcf        = vcfPath,
 #'     resolution = 10000,
 #'     minSamples = 2)
-loopQTLsetup <- function(samples,
-                         vcf,
-                         resolution,
-                         minSamples = 2,
-                         BPPARAM = BiocParallel::SerialParam()) {
+loopQTLsetup <- function(
+    samples,
+    vcf,
+    resolution,
+    minSamples = 2,
+    BPPARAM = BiocParallel::SerialParam()
+) {
     stopifnot(
         is.data.frame(samples),
         all(c("Sample", "hic", "loops") %in% names(samples)),
@@ -82,7 +85,8 @@ loopQTLsetup <- function(samples,
     if (!file.exists(tbi)) {
         .stopNoCall(
             "Tabix index not found: ", tbi,
-            "\nPlease bgzip + tabix-index your VCF (e.g. `tabix -p vcf my.vcf.gz`)."
+            "\nPlease bgzip + tabix-index your VCF ",
+            "(e.g. `tabix -p vcf my.vcf.gz`)."
         )
     }
 
@@ -113,9 +117,10 @@ loopQTLsetup <- function(samples,
         " sample(s) present in both samplesheet and VCF."
     )
 
-    ## Per-.hic metadata + resolution / NONE check (header reads only)  # Also build per-sample chromosome-naming normalizers so we can map a
-    ## user-style chrom string (e.g. "1") to whatever this .hic file uses
-    ## (e.g. "chr1") when summing cis.
+    ## Per-.hic metadata + resolution / NONE check (header reads only) # Also
+    ## build per-sample chromosome-naming normalizers so we can map a user-style
+    ## chrom string (e.g. "1") to whatever this .hic file uses (e.g. "chr1")
+    ## when summing cis.
     chrom_norm_per_sample <- vector("list", length(hicPaths))
     hic_chroms_per_sample <- vector("list", length(hicPaths))
     for (i in seq_along(hicPaths)) {
@@ -147,10 +152,10 @@ loopQTLsetup <- function(samples,
         function(d) d[d$chrA == d$chrB, , drop = FALSE]
     )
 
-    ## Exact-coordinate consensus  # Canonicalise (smaller anchor first), build a string key per loop, then
-    ## count distinct samples per key. Keep keys with support >= minSamples.
-    ## No clustering, no jitter tolerance: two loops are the same only if
-    ## (chrA, startA, endA, chrB, startB, endB) match exactly.
+    ## Exact-coordinate consensus # Canonicalise (smaller anchor first), build a
+    ## string key per loop, then count distinct samples per key. Keep keys with
+    ## support >= minSamples. No clustering, no jitter tolerance: two loops are
+    ## the same only if (chrA, startA, endA, chrB, startB, endB) match exactly.
     canonicalise <- function(d) {
         if (nrow(d) == 0) {
             return(d)
@@ -171,7 +176,9 @@ loopQTLsetup <- function(samples,
 
     per_sample_n <- vapply(per_sample_loops, nrow, integer(1))
     if (sum(per_sample_n > 0) < 2) {
-        .stopNoCall("Need at least 2 samples with at least one intra-chrom loop call")
+        .stopNoCall(
+            "Need at least 2 samples with at least one intra-chrom loop call"
+        )
     }
     if (any(per_sample_n == 0)) {
         message(
@@ -253,10 +260,10 @@ loopQTLsetup <- function(samples,
 
     repA <- InteractionSet::anchors(gi, type = "first")
 
-    ## cis: user-supplied if provided, else auto-computed from .hic
-    cisChroms <- unique(as.character(GenomicRanges::seqnames(repA))) # chroms with consensus loops; defines the
-    ## set of chroms cis is summed over (consistent
-    ## with what normalize will process)
+    ## cis: user-supplied if provided, else auto-computed from .hic.
+    ## cisChroms = chroms with consensus loops; defines the set of chroms
+    ## cis is summed over (consistent with what normalize will process).
+    cisChroms <- unique(as.character(GenomicRanges::seqnames(repA)))
 
     cisVec <- if (!is.null(userCis)) {
         if (anyNA(userCis) || any(userCis <= 0)) {
@@ -279,7 +286,11 @@ loopQTLsetup <- function(samples,
         )
     }
 
-    cis_source_tag <- if (!is.null(userCis)) "userProvided" else "computed_from_hic"
+    cis_source_tag <- if (!is.null(userCis)) {
+        "userProvided"
+    } else {
+        "computed_from_hic"
+    }
 
     metadata <- list(
         resolution = resolution,
@@ -308,9 +319,11 @@ loopQTLsetup <- function(samples,
 ## Internal: compute per-sample cis depth by summing all straw counts across
 ## the given chroms. Returns a named numeric vector (one entry per sample).
 ## Parallel unit of work: one (sample, chrom) straw pull + sum.
-.computeCisFromHiC <- function(hicPaths, sampleIDs, chroms,
-                               resolution, chromNorms,
-                               BPPARAM = BiocParallel::SerialParam()) {
+.computeCisFromHiC <- function(
+    hicPaths, sampleIDs, chroms,
+    resolution, chromNorms,
+    BPPARAM = BiocParallel::SerialParam()
+) {
     grid <- expand.grid(
         sampleI = seq_along(sampleIDs),
         chrom = chroms,
@@ -335,7 +348,10 @@ loopQTLsetup <- function(samples,
         sum(as.numeric(dat$counts))
     }
 
-    results <- BiocParallel::bplapply(seq_len(nrow(grid)), one, BPPARAM = BPPARAM)
+    results <- BiocParallel::bplapply(
+        seq_len(nrow(grid)), one,
+        BPPARAM = BPPARAM
+    )
     cisVec <- setNames(numeric(length(sampleIDs)), sampleIDs)
     for (k in seq_len(nrow(grid))) {
         cisVec[grid$sampleI[k]] <- cisVec[grid$sampleI[k]] + results[[k]]

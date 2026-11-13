@@ -1,7 +1,7 @@
 #' Anchor-restricted association testing
 #'
 #' This function first reads all anchor-window SNPs from the VCF, and runs
-#' MatrixEQTL twice - once treating anchor A as the gene position, once anchor 
+#' MatrixEQTL twice - once treating anchor A as the gene position, once anchor
 #' B. The two result tables are outer-joined on SNP-loop level. Covariates are
 #' supplied via the `covariates` argument - typically the phenotype PCs chosen
 #' in the previous step. By default, rank-based inverse normal transformation
@@ -10,15 +10,15 @@
 #' @param obj A loopQTL object on which `loopQTLnormalize()` has been run.
 #' @param window Base-pair window flank added to each anchor bin when matching
 #' SNPs. Default 0.
-#' @param covariates Optional `samples x k` matrix/data.frame. If NULL, will be 
+#' @param covariates Optional `samples x k` matrix/data.frame. If NULL, will be
 #' auto-chosen via loopQTLchooseK().
-#' @param normal Apply Rank-based Inverse Normal Transformation (RINT) per loop 
+#' @param normal Apply Rank-based Inverse Normal Transformation (RINT) per loop
 #' before regression. Default `TRUE`.
-#' @param Kmethod `"elbow"` or `"BE"`; passed to `loopQTLchooseK()` when 
+#' @param Kmethod `"elbow"` or `"BE"`; passed to `loopQTLchooseK()` when
 #' covariates is `NULL`. Default `"elbow"`.
 #' @param Kmax The maximum number of PCs used. Defaults to the number of samples
 #' minus two.
-#' @param pvOutputThreshold MatrixEQTL p-value threshold. Default 1 (return 
+#' @param pvOutputThreshold MatrixEQTL p-value threshold. Default 1 (return
 #' every pair).
 #'
 #' @return The loopQTL object with `results(obj)` filled.
@@ -43,13 +43,15 @@
 #'     obj,
 #'     window     = 10000,
 #'     covariates = Kres$PCs)
-runQTL <- function(obj,
-                   window = 0,
-                   covariates = NULL,
-                   normal = TRUE,
-                   Kmethod = c("elbow", "BE"),
-                   Kmax = NULL,
-                   pvOutputThreshold = 1) {
+runQTL <- function(
+    obj,
+    window = 0,
+    covariates = NULL,
+    normal = TRUE,
+    Kmethod = c("elbow", "BE"),
+    Kmax = NULL,
+    pvOutputThreshold = 1
+) {
     stopifnot(
         methods::is(obj, "loopQTL"),
         length(obj@phenotype) > 0,
@@ -177,13 +179,17 @@ runQTL <- function(obj,
 
     ## Resolve covariates
     if (is.null(covariates)) {
-        ## Use the already-RINT'd-or-not `phenotype` matrix to avoid double-RINT.
+        ## Use the already-RINT'd-or-not `phenotype` matrix to avoid
+        ## double-RINT.
         Kres <- .pca_for_qtl(phenotype,
             samples = samplesVec,
             Kmethod = Kmethod, Kmax = Kmax
         )
         cvrtMat <- t(Kres$PCs) # MatrixEQTL wants k x nSamples
-        obj_K_meta <- list(K = Kres$K, Kmethod = Kres$method, Ksource = "autoPCAForQTL")
+        obj_K_meta <- list(
+            K = Kres$K, Kmethod = Kres$method,
+            Ksource = "autoPCAForQTL"
+        )
     } else {
         covDF <- as.data.frame(covariates, stringsAsFactors = FALSE)
         if (!is.null(rownames(covDF))) {
@@ -198,12 +204,16 @@ runQTL <- function(obj,
         } else if (nrow(covDF) != length(samplesVec)) {
             .stopNoCall(
                 "`covariates` has ", nrow(covDF), " rows but ",
-                length(samplesVec), " samples; provide rownames or matched order"
+                length(samplesVec),
+                " samples; provide rownames or matched order"
             )
         }
         cvrtMat <- t(as.matrix(covDF))
         colnames(cvrtMat) <- samplesVec
-        obj_K_meta <- list(K = nrow(cvrtMat), Kmethod = NA_character_, Ksource = "user")
+        obj_K_meta <- list(
+            K = nrow(cvrtMat), Kmethod = NA_character_,
+            Ksource = "user"
+        )
     }
     obj@metadata$runQTL_K <- obj_K_meta
     obj@metadata$runQTLNormal <- normal
@@ -217,7 +227,9 @@ runQTL <- function(obj,
     ## SNP positions (use original loop chrom style for output, but MatrixEQTL
     ## uses position tables only for cis-distance arithmetic, so we feed it the
     ## vcf-style chrom names and matching anchor chrom names)
-    loop_chrom_vcf <- vcfChromNormalizerFunc(as.character(GenomicRanges::seqnames(anchorA)))
+    loop_chrom_vcf <- vcfChromNormalizerFunc(
+        as.character(GenomicRanges::seqnames(anchorA))
+    )
     snpspos <- data.frame(
         snpid = snpID,
         chr = snpChromVCF,
@@ -265,7 +277,8 @@ runQTL <- function(obj,
         stringsAsFactors = FALSE
     )
     out <- merge(merged, snpMeta, by = "snpID", all.x = TRUE, sort = FALSE)
-    out$nUsed <- rowSums(!is.na(dosage[match(out$snpID, rownames(dosage)), , drop = FALSE]))
+    dosageRows <- dosage[match(out$snpID, rownames(dosage)), , drop = FALSE]
+    out$nUsed <- rowSums(!is.na(dosageRows))
 
     ## Final column order
     out <- out[, c(
@@ -305,8 +318,11 @@ runQTL <- function(obj,
     }
     sp <- strsplit(raw[ok], "/", fixed = TRUE)
     bad <- vapply(sp, function(x) length(x) != 2, logical(1))
-    a1 <- suppressWarnings(as.integer(vapply(sp, `[`, character(1), 1)))
-    a2 <- suppressWarnings(as.integer(vapply(sp, `[`, character(1), 2)))
+    ## strtoi() returns NA quietly for non-integer strings, avoiding the
+    ## "NAs introduced by coercion" warning that as.integer() raises. Invalid
+    ## entries are caught in `bad` below either way.
+    a1 <- strtoi(vapply(sp, `[`, character(1), 1))
+    a2 <- strtoi(vapply(sp, `[`, character(1), 2))
     bad <- bad | is.na(a1) | is.na(a2) | a1 > 1 | a2 > 1
     vals <- ifelse(bad, NA_real_, a1 + a2)
     out[ok] <- vals
@@ -324,9 +340,11 @@ runQTL <- function(obj,
 }
 
 ## Run MatrixEQTL and return a simplified data.frame of cis hits
-.run_matrix_eqtl <- function(snpsSd, geneSD, cvrtSd,
-                             snpspos, genepos,
-                             cisDist, pvOutputThreshold) {
+.run_matrix_eqtl <- function(
+    snpsSd, geneSD, cvrtSd,
+    snpspos, genepos,
+    cisDist, pvOutputThreshold
+) {
     tmpCis <- tempfile()
     on.exit(unlink(tmpCis), add = TRUE)
     res <- MatrixEQTL::Matrix_eQTL_main(

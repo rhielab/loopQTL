@@ -1,7 +1,26 @@
 Package: loopQTL
 Title: Anchor-Restricted Loop QTL Mapping from Hi-C
 Version: 0.99.0
-Authors@R: c(person("Rhie Lab at the University of Southern California", email = "rhielab@gmail.com", role = "cre"), person("Zexun", "Wu", role = "aut", email = "zexunwu@usc.edu"))
+Authors@R: c(
+    person("Rhie Lab at the University of Southern California",
+        email = "rhielab@gmail.com", role = "cre"),
+    person("Zexun", "Wu", role = "aut", email = "zexunwu@usc.edu",
+        comment = c(ORCID = "0000-0003-2566-1326")),
+    person("Andrew", "Vu", role = "aut"),
+    person("Matthew", "Salcedo", role = "aut"),
+    person("Ethan", "Nelson-Moore", role = "aut"),
+    person(given = "Suhn K.", family = "Rhie", role = "aut",
+        email = "rhie@usc.edu"),
+    person("National Institutes of Health", role = "fnd",
+        comment = "R21CA260082, R21CA264637, R21HG011506, P30CA014089"),
+    person("Department of Defense", role = "fnd",
+        comment = "W81XWH-21-1-0805"),
+    person("USC Keck School of Medicine", role = "fnd",
+        comment = "pilot grant"),
+    person("USC Center for Genetic Epidemiology", role = "fnd",
+        comment = "pilot grant"),
+    person("USC Norris Comprehensive Cancer Center", role = "fnd",
+        comment = "pilot grant"))
 Description: Maps chromatin loop QTLs by testing whether genotype at a loop's
     anchors associates with the loop's contact strength across samples. Reads
     .hic files via strawr, builds an exact-coordinate consensus loop set,
@@ -16,7 +35,7 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 BiocType: Software
 biocViews: Software, DNA3DStructure, Epigenetics, HiC, QuantitativeTrailLocus, SNP
-Depends: R (>= 4.4)
+Depends: R (>= 4.4.0)
 Imports:
     methods,
     stats,
@@ -37,7 +56,7 @@ Imports:
     scales,
     rtracklayer,
     patchwork
-Suggests: BiocStyle, knitr, rmarkdown
+Suggests: BiocStyle, knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3

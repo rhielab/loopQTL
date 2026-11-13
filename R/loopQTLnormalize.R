@@ -9,7 +9,7 @@
 #'
 #' Please note that you need to set `saveWindows` to TRUE to additionally output
 #' a per-SNP contact-window matrix as .rds file. This file is needed by the
-#' `loopQTLplotSnpWindow()` and `loopQTLplotLocus()` downstream functions. 
+#' `loopQTLplotSnpWindow()` and `loopQTLplotLocus()` downstream functions.
 #' `saveWindows` does not change `phenotype(obj)` or affect the `runQTL()` step.
 #'
 #' @param obj A loopQTL object created from `loopQTLsetup()`.
@@ -21,8 +21,8 @@
 #'   file the per-SNP windows are written to.
 #' @param window Minimum window extent in bp around each in-loop SNP to
 #' create `.rds` file when `saveWindows = TRUE`. Default 1000000.
-#' @param snpWindow Base-pair window flank added to each consensus anchor when selecting
-#'   in-loop SNPs. Default 0.
+#' @param snpWindow Base-pair window flank added to each consensus anchor when
+#'   selecting in-loop SNPs. Default 0.
 #'
 #' @return The loopQTL `obj` with `phenotype(obj)` filled.
 #' @import data.table
@@ -51,19 +51,24 @@
 #'     windowsOut  = file.path(tempDirectory, "loop_snp_windows.rds"),
 #'     window      = 2000000,
 #'     snpWindow   = 10000)
-loopQTLnormalize <- function(obj,
-                             BPPARAM = BiocParallel::SerialParam(),
-                             saveWindows = FALSE,
-                             windowsOut = NULL,
-                             window = 1000000,
-                             snpWindow = 0) {
+loopQTLnormalize <- function(
+    obj,
+    BPPARAM = BiocParallel::SerialParam(),
+    saveWindows = FALSE,
+    windowsOut = NULL,
+    window = 1000000,
+    snpWindow = 0
+) {
     stopifnot(methods::is(obj, "loopQTL"))
 
     ## saveWindows validation: path required, VCF must be set
     if (saveWindows) {
         if (is.null(windowsOut) || !is.character(windowsOut) ||
             length(windowsOut) != 1 || !nzchar(windowsOut)) {
-            .stopNoCall("saveWindows = TRUE requires `windowsOut`: a single .rds path")
+            .stopNoCall(
+                "saveWindows = TRUE requires `windowsOut`: ",
+                "a single .rds path"
+            )
         }
         stopifnot(
             is.numeric(window), length(window) == 1, window > 0,
@@ -85,8 +90,9 @@ loopQTLnormalize <- function(obj,
         if (!okTouch) {
             .stopNoCall("Cannot write to windowsOut path: ", windowsOut)
         }
-        if (is.null(obj@vcfPath) || is.na(obj@vcfPath) || !nzchar(obj@vcfPath)) {
-            .stopNoCall("obj@vcfPath is not set; cannot read SNPs for windows")
+        vcfP <- obj@vcfPath
+        if (is.null(vcfP) || is.na(vcfP) || !nzchar(vcfP)) {
+            .stopNoCall("vcfPath(obj) is not set; cannot read SNPs for windows")
         }
     } else if (!is.null(windowsOut)) {
         .warningNoCall("`windowsOut` is ignored when saveWindows = FALSE")
@@ -95,19 +101,19 @@ loopQTLnormalize <- function(obj,
     ## BNBC's logCPM depth correction requires cis
     if (length(obj@cis) == 0) {
         .stopNoCall(
-            "Normalize requires per-sample cis depth in obj@cis, but it is ",
-            "empty. Options:\n",
-            "  1. Include a `cis` column in the samplesheet at loopQTLsetup(), or\n",
-            "  2. Re-run loopQTLsetup() (cis is auto-computed from .hic when no\n",
-            "     `cis` column is provided), or\n",
-            "  3. Manually attach: obj@cis <- setNames(<numeric>, obj@samples)"
+            "Normalize requires per-sample cis depth in cis(obj), but it ",
+            "is empty. Options:\n",
+            "  1. Include a `cis` column in the samplesheet at ",
+            "loopQTLsetup(), or\n",
+            "  2. Re-run loopQTLsetup() (cis is auto-computed from .hic ",
+            "when no `cis` column is provided)."
         )
     }
     if (length(obj@cis) != length(obj@samples) ||
         !identical(names(obj@cis), obj@samples)) {
         .stopNoCall(
-            "obj@cis must be a named numeric vector with one entry per sample, ",
-            "names matching obj@samples"
+            "cis(obj) must be a named numeric vector with one entry per ",
+            "sample, names matching samples(obj)"
         )
     }
 
@@ -115,9 +121,13 @@ loopQTLnormalize <- function(obj,
     resolution <- obj@resolution
     loopsGInteractions <- obj@loops
 
-    ## Per-sample per-chrom hic paths from metadata (we re-derive from setup invariants)
+    ## Per-sample per-chrom hic paths from metadata (we re-derive from setup
+    ## invariants)
     if (is.null(obj@metadata$hicPaths)) {
-        .stopNoCall("obj@metadata$hicPaths missing; loopQTLsetup must record the per-sample .hic paths")
+        .stopNoCall(
+            "metadata(obj)[[\"hicPaths\"]] missing; loopQTLsetup must ",
+            "record the per-sample .hic paths"
+        )
     }
     hicPaths <- obj@metadata$hicPaths
 
@@ -126,8 +136,8 @@ loopQTLnormalize <- function(obj,
     anchorB <- InteractionSet::anchors(loopsGInteractions, type = "second")
     loopChr <- as.character(GenomicRanges::seqnames(anchorA))
     ## Floor each anchor's midpoint to the bin containing it - straw returns
-    ## bin-based contacts, so we look up at bin granularity even when the consensus
-    ## key is exact-coord.
+    ## bin-based contacts, so we look up at bin granularity even when the
+    ## consensus key is exact-coord.
     loopBinA <- .binAnchor(
         GenomicRanges::start(anchorA),
         GenomicRanges::end(anchorA), resolution
@@ -177,7 +187,8 @@ loopQTLnormalize <- function(obj,
             missingChr <- setdiff(winChroms, chroms_to_run)
             if (length(missingChr) > 0) {
                 .stopNoCall(
-                    "saveWindows: SNP chrom(s) not in normalize's chroms_to_run: ",
+                    "saveWindows: SNP chrom(s) not in normalize's ",
+                    "chroms_to_run: ",
                     paste(missingChr, collapse = ", ")
                 )
             }
@@ -186,8 +197,13 @@ loopQTLnormalize <- function(obj,
                 nrow, integer(1)
             ))
             estMb <- n_total_cells * length(samplesVec) * 8 / 1024^2
+            fmt <- paste0(
+                "saveWindows: %d SNP(s), %d unique cells across %d ",
+                "chrom(s); estimated ~%.1f MB in memory ",
+                "(8 bytes x cells x samples)"
+            )
             message(sprintf(
-                "saveWindows: %d SNP(s), %d unique cells across %d chrom(s); estimated ~%.1f MB in memory (8 bytes x cells x samples)",
+                fmt,
                 nrow(windowsCtx$snpsDF),
                 n_total_cells, length(winChroms), estMb
             ))
@@ -226,12 +242,13 @@ loopQTLnormalize <- function(obj,
             dat
         })
 
-        ## 2. BNBC normalization. Filter emission to consensus (binA, binB) pairs
-        ## on this chrom; QN math is still computed over the full band, only the
-        ## final triplet emission is restricted, which keeps the dcast wide-pivot
-        ## from blowing past R's integer.max on large chroms with many samples.
-        ## When saveWindows is on, also include the SNP window cells in the keep
-        ## set so a single BNBC pass emits both consensus + window cells.
+        ## 2. BNBC normalization. Filter emission to consensus (binA, binB)
+        ## pairs on this chrom; QN math is still computed over the full band,
+        ## only the final triplet emission is restricted, which keeps the dcast
+        ## wide-pivot from blowing past R's integer.max on large chroms with
+        ## many samples. When saveWindows is on, also include the SNP window
+        ## cells in the keep set so a single BNBC pass emits both consensus +
+        ## window cells.
         keep_pairs_chr <- cbind(loopBinA[rows], loopBinB[rows])
         window_cells_chr <- NULL
         if (saveWindows && !is.null(windowsCtx) &&
@@ -253,7 +270,10 @@ loopQTLnormalize <- function(obj,
         ## normVals: data.table(chr, region1, region2, IF_1, ..., IF_n)
 
         ## 3. Index consensus loops on this chrom into the normalized table
-        normKeys <- paste(normVals$chr, normVals$region1, normVals$region2, sep = ":")
+        normKeys <- paste(
+            normVals$chr, normVals$region1, normVals$region2,
+            sep = ":"
+        )
         m <- match(wantKeys, normKeys)
         ifCols <- grep("^IF_", names(normVals), value = TRUE)
         chromMat <- matrix(0,
@@ -288,7 +308,8 @@ loopQTLnormalize <- function(obj,
                 windowsMat[j, ] <- vals
             }
 
-            ## Raw counts: match window cells against each sample's straw sparse output
+            ## Raw counts: match window cells against each sample's straw sparse
+            ## output
             winKeyLocal <- paste(window_cells_chr$binI, window_cells_chr$binJ,
                 sep = ":"
             )
@@ -313,8 +334,10 @@ loopQTLnormalize <- function(obj,
         )
     }
 
-    chromResults <- BiocParallel::bplapply(chroms_to_run, 
-                                           per_chr_worker, BPPARAM = BPPARAM)
+    chromResults <- BiocParallel::bplapply(
+        chroms_to_run,
+        per_chr_worker, BPPARAM = BPPARAM
+    )
     names(chromResults) <- chroms_to_run
 
     ## Assemble per-chrom slices into the full (loops x samples) phenotype
@@ -377,7 +400,8 @@ loopQTLnormalize <- function(obj,
                 offset <- offset + ncolChr
             }
 
-            ## Per-SNP colIndices: local within-chrom indices + that chrom's offset
+            ## Per-SNP colIndices: local within-chrom indices + that chrom's
+            ## offset
             snpChrom <- windowsCtx$snpsDF$chromOrig
             nSnp <- nrow(windowsCtx$snpsDF)
             colIndices <- vector("list", nSnp)
@@ -517,7 +541,8 @@ loopQTLnormalize <- function(obj,
         }
     }
 
-    ## 1. per-sample triplets, depth-corrected log, upper-triangle, keyed by band
+    ## 1. per-sample triplets, depth-corrected log, upper-triangle, keyed by
+    ## band
     per_sample_dt <- vector("list", nSamples)
     for (s in seq_len(nSamples)) {
         d <- sparseList[[s]]
@@ -568,13 +593,14 @@ loopQTLnormalize <- function(obj,
         activeI <- sort(unique(unlist(lapply(sampData, function(sd) sd$i))))
         L <- length(activeI)
         if (L == 0) next
-        ## Note: L = 1 is OK - preprocessCore returns all samples equal to the mean.
-        ## That degenerate cell will have zero variance downstream and be skipped.
+        ## Note: L = 1 is OK - preprocessCore returns all samples equal to the
+        ## mean. That degenerate cell will have zero variance downstream and be
+        ## skipped.
 
         ## Build L x nSamples dense block. The "missing" fill is the per-sample
-        ## logCPM transform of raw-count=0 (not literally 0) - because not having
-        ## a triplet at (i, i+b) means the underlying raw count was 0, and
-        ## log((0+0.5)/libs[s] + cOffset) is a small negative value, not 0.
+        ## logCPM transform of raw-count=0 (not literally 0) - because not
+        ## having a triplet at (i, i+b) means the underlying raw count was 0,
+        ## and log((0+0.5)/libs[s] + cOffset) is a small negative value, not 0.
         zeroFill <- vapply(
             seq_len(nSamples), function(s) transformSample(0, s),
             numeric(1)
@@ -593,9 +619,9 @@ loopQTLnormalize <- function(obj,
         ## saves memory.
         preprocessCore::normalize.quantiles(qn, copy = FALSE)
 
-        ## Filter QN output rows to keepPairs (if requested) BEFORE materializing
-        ## the triplet emission. This is the fix that prevents the dcast CJ
-        ## overflow on large chroms with many samples.
+        ## Filter QN output rows to keepPairs (if requested) BEFORE
+        ## materializing the triplet emission. This is the fix that prevents the
+        ## dcast CJ overflow on large chroms with many samples.
         if (!is.null(keepSet)) {
             bandKeys <- paste(activeI, activeI + b, sep = "_")
             keepRows <- which(bandKeys %in% keepSet)
@@ -617,7 +643,10 @@ loopQTLnormalize <- function(obj,
             vals <- qn[nzMask]
         } else {
             ## Emit every cell (all are informative under logCPM)
-            idxs <- which(matrix(TRUE, nrow = nrow(qn), ncol = ncol(qn)), arr.ind = TRUE)
+            idxs <- which(
+                matrix(TRUE, nrow = nrow(qn), ncol = ncol(qn)),
+                arr.ind = TRUE
+            )
             vals <- as.numeric(qn)
         }
         outputChunks[[k]] <- data.table::data.table(
