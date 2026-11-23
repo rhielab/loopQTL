@@ -1,8 +1,6 @@
 # loopQTL
 
-An R package for mapping chromatin loop QTLs from Hi-C: **does a SNP at a loop's anchors associate with the loop's contact strength across samples?**
-
-Unlike peak-centric window-scan tools (e.g. QTLtools), `loopQTL` only tests SNPs that fall inside a loop's **anchor bins** - because for a given loop, SNPs elsewhere in a wide cis-window are biologically unrelated to whether that loop forms. Intra-chromosomal loops only. No FDR or lead-SNP selection inside the package (returned as a full per-(loop, SNP) table so users can apply their own correction).
+loopQTL identifies SNPs associated with chromatin interaction signals across samples. It implements a band-wise joint normalization approach (referenced from Brant et al, Brief Bioinform, 2024) that systematically tests the association between variants and their anchored loops, together with downstream functions for annotation and visualization for the user’s convenience.
 
 ## Pipeline overview
 
