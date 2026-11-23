@@ -16,8 +16,8 @@ loopQTLnormalize(
 \arguments{
 \item{obj}{A loopQTL object created from \code{loopQTLsetup()}.}
 
-\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam]{BiocParallel::BiocParallelParam} for parallelization
-over chromosomes. Default \code{\link[BiocParallel:SerialParam]{BiocParallel::SerialParam()}}.}
+\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} for parallelization
+over chromosomes. Default \code{\link[BiocParallel:SerialParam-class]{BiocParallel::SerialParam()}}.}
 
 \item{saveWindows}{Logical. If \code{TRUE}, also save a local contact submatrix
 around each in-loop SNP for downstream functions usage.}

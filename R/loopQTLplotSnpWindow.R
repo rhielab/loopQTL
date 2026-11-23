@@ -76,30 +76,30 @@
 #' head(results(obj))
 #' p <- loopQTLplotSnpWindow(
 #'     obj,
-#'     chrom      = "chr1",
-#'     start      = 45900000,
-#'     end        = 46300000,
-#'     snpID      = "rs11584814",
+#'     chrom      = "chr2",
+#'     start      = 172100000,
+#'     end        = 172550000,
+#'     snpID      = "rs12052253",
 #'     normal     = TRUE,
 #'     covariates = "auto"
 #' )
 loopQTLplotSnpWindow <- function(
-  obj, snpID,
-  chrom = NULL,
-  start = NULL,
-  end = NULL,
-  windows = NULL,
-  mirror = TRUE,
-  minSamplesPerCell = 3,
-  normal = FALSE,
-  covariates = NULL,
-  Kmethod = c("elbow", "BE"),
-  Kmax = NULL,
-  limit = NULL,
-  palette = "RdBu",
-  metric = c("betaLogp", "beta"),
-  values = c("normalized", "cpm", "raw"),
-  axisUnit = c("Mb", "bp")
+    obj, snpID,
+    chrom = NULL,
+    start = NULL,
+    end = NULL,
+    windows = NULL,
+    mirror = TRUE,
+    minSamplesPerCell = 3,
+    normal = FALSE,
+    covariates = NULL,
+    Kmethod = c("elbow", "BE"),
+    Kmax = NULL,
+    limit = NULL,
+    palette = "RdBu",
+    metric = c("betaLogp", "beta"),
+    values = c("normalized", "cpm", "raw"),
+    axisUnit = c("Mb", "bp")
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),

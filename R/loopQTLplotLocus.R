@@ -51,25 +51,25 @@
 #' ## Return is a ggplot object so you can ggsave() to output.
 #' p <- loopQTLplotLocus(
 #'     obj,
-#'     chrom = "chr1",
-#'     start = 45900000,
-#'     end = 46300000,
-#'     snpID = "rs11584814",
+#'     chrom = "chr2",
+#'     start = 172100000,
+#'     end = 172550000,
+#'     snpID = "rs12052253",
 #'     values = "cpm",
 #'     gtf = gtfPath
 #' )
 loopQTLplotLocus <- function(
-  obj, snpID,
-  chrom, start, end,
-  gtf,
-  pThreshold = 0.05,
-  values = c("normalized", "cpm", "raw"),
-  windows = NULL,
-  strongColor = "#FF7917",
-  weakColor = "grey90",
-  limit = NULL,
-  geneBiotypes = "protein_coding",
-  axisUnit = c("Mb", "bp")
+    obj, snpID,
+    chrom, start, end,
+    gtf,
+    pThreshold = 0.05,
+    values = c("normalized", "cpm", "raw"),
+    windows = NULL,
+    strongColor = "#FF7917",
+    weakColor = "grey90",
+    limit = NULL,
+    geneBiotypes = "protein_coding",
+    axisUnit = c("Mb", "bp")
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -616,9 +616,9 @@ loopQTLplotLocus <- function(
 }
 
 .build_arc_panel <- function(
-  arcDF, start, end, axisFormat,
-  effLo, effHi, strongColor, weakColor,
-  panelTitle, showX = FALSE
+    arcDF, start, end, axisFormat,
+    effLo, effHi, strongColor, weakColor,
+    panelTitle, showX = FALSE
 ) {
     ## Expand each arc into a path of points
     paths <- do.call(rbind, lapply(seq_len(nrow(arcDF)), function(i) {

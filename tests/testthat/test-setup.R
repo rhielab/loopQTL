@@ -18,13 +18,13 @@ test_that("loopQTLsetup() builds a valid loopQTL object from extdata", {
     obj <- loopQTLsetup(
         samples    = samplesheet,
         vcf        = vcfPath_,
-        resolution = 10000,
+        resolution = 5000,
         minSamples = 2
     )
 
     expect_s4_class(obj, "loopQTL")
     expect_equal(sort(samples(obj)), sort(samplesheet$Sample))
-    expect_equal(resolution(obj), 10000L)
+    expect_equal(resolution(obj), 5000L)
     expect_equal(vcfPath(obj), vcfPath_)
     expect_gt(length(loops(obj)), 0)
     ## Loops should be intra-chromosomal
@@ -39,14 +39,14 @@ test_that("loopQTLsetup() rejects malformed input", {
     expect_error(
         loopQTLsetup(
             samples = "not a dataframe", vcf = "x.vcf.gz",
-            resolution = 10000
+            resolution = 5000
         ),
         regexp = "is.data.frame"
     )
 
     bad <- data.frame(foo = "sample1", bar = "f.hic")
     expect_error(
-        loopQTLsetup(samples = bad, vcf = "x.vcf.gz", resolution = 10000),
+        loopQTLsetup(samples = bad, vcf = "x.vcf.gz", resolution = 5000),
         regexp = "Sample|hic|loops"
     )
 })

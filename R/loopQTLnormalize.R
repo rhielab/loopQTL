@@ -54,12 +54,12 @@
 #'     snpWindow   = 10000
 #' )
 loopQTLnormalize <- function(
-  obj,
-  BPPARAM = BiocParallel::SerialParam(),
-  saveWindows = FALSE,
-  windowsOut = NULL,
-  window = 1000000,
-  snpWindow = 0
+    obj,
+    BPPARAM = BiocParallel::SerialParam(),
+    saveWindows = FALSE,
+    windowsOut = NULL,
+    window = 1000000,
+    snpWindow = 0
 ) {
     stopifnot(methods::is(obj, "loopQTL"))
 

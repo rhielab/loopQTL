@@ -50,15 +50,15 @@
 #' obj <- loopQTLsetup(
 #'     samples    = samples,
 #'     vcf        = vcfPath,
-#'     resolution = 10000,
+#'     resolution = 5000,
 #'     minSamples = 2
 #' )
 loopQTLsetup <- function(
-  samples,
-  vcf,
-  resolution,
-  minSamples = 2,
-  BPPARAM = BiocParallel::SerialParam()
+    samples,
+    vcf,
+    resolution,
+    minSamples = 2,
+    BPPARAM = BiocParallel::SerialParam()
 ) {
     stopifnot(
         is.data.frame(samples),
@@ -323,9 +323,9 @@ loopQTLsetup <- function(
 ## the given chroms. Returns a named numeric vector (one entry per sample).
 ## Parallel unit of work: one (sample, chrom) straw pull + sum.
 .computeCisFromHiC <- function(
-  hicPaths, sampleIDs, chroms,
-  resolution, chromNorms,
-  BPPARAM = BiocParallel::SerialParam()
+    hicPaths, sampleIDs, chroms,
+    resolution, chromNorms,
+    BPPARAM = BiocParallel::SerialParam()
 ) {
     grid <- expand.grid(
         sampleI = seq_along(sampleIDs),

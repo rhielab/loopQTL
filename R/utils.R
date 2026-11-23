@@ -99,8 +99,8 @@
 ##   )
 ## Returns NULL if no eligible SNPs are found (caller short-circuits).
 .compute_snp_windows <- function(
-  vcfPath, anchorA, anchorB,
-  snpWindow, window, resolution
+    vcfPath, anchorA, anchorB,
+    snpWindow, window, resolution
 ) {
     if (!file.exists(vcfPath)) {
         .stopNoCall("VCF not found: ", vcfPath)

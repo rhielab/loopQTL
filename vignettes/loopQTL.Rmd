@@ -170,7 +170,7 @@ head(samples)
 obj <- loopQTLsetup(
     samples    = samples,
     vcf        = vcfPath,
-    resolution = 10000,
+    resolution = 5000,
     minSamples = 2
 )
 obj
@@ -215,7 +215,7 @@ regression. This function returns a list with the chosen K and the
 sample × K matrix of PCs.
 
 ```{r run-chooseK}
-Kres <- loopQTLchooseK(obj, Kmethod = "elbow")
+Kres <- loopQTLchooseK(obj, Kmethod = "elbow", Kmax = 2)
 message("PCAForQTL chose K = ", Kres$K, " via ", Kres$method)
 head(Kres$PCs)
 ```
@@ -247,8 +247,8 @@ specific hit or exporting sample-level values for reporting.
 ```{r run-pairData}
 pair <- loopQTLpairData(
     obj,
-    loopID = "L0000187_chr1_46030000_46220000",
-    snpID  = "rs11584814"
+    loopID = "L0000037_chr2_172207000_172457000",
+    snpID  = "rs12052253"
 )
 head(pair)
 ```
@@ -292,8 +292,8 @@ with `ggsave()`.
 ```{r run-plotPair}
 p <- loopQTLplotPair(
     obj,
-    loopID = "L0000187_chr1_46030000_46220000",
-    snpID  = "rs11584814"
+    loopID = "L0000037_chr2_172207000_172457000",
+    snpID  = "rs12052253"
 )
 p
 ```
@@ -311,10 +311,10 @@ loopQTLnormalize.
 gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
 p <- loopQTLplotLocus(
     obj,
-    chrom = "chr1",
-    start = 45900000,
-    end = 46300000,
-    snpID = "rs11584814",
+    chrom = "chr2",
+    start = 172100000,
+    end = 172550000,
+    snpID = "rs12052253",
     values = "cpm",
     gtf = gtfPath
 )
@@ -333,10 +333,10 @@ used in `runQTL()`.
 ```{r run-plotSnpWindow}
 p <- loopQTLplotSnpWindow(
     obj,
-    chrom      = "chr1",
-    start      = 45900000,
-    end        = 46300000,
-    snpID      = "rs11584814",
+    chrom      = "chr2",
+    start      = 172100000,
+    end        = 172550000,
+    snpID      = "rs12052253",
     normal     = TRUE,
     covariates = "auto",
     Kmax       = 2

@@ -86,10 +86,10 @@ gtfPath <- system.file("extdata", "example.gtf.gz", package = "loopQTL")
 ## Return is a ggplot object so you can ggsave() to output.
 p <- loopQTLplotLocus(
     obj,
-    chrom = "chr1",
-    start = 45900000,
-    end = 46300000,
-    snpID = "rs11584814",
+    chrom = "chr2",
+    start = 172100000,
+    end = 172550000,
+    snpID = "rs12052253",
     values = "cpm",
     gtf = gtfPath
 )

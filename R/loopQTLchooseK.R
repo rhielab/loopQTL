@@ -26,11 +26,11 @@
 #' Kres <- loopQTLchooseK(obj, Kmethod = "elbow")
 #' Kres$K
 loopQTLchooseK <- function(
-  obj,
-  Kmethod = c("elbow", "BE"),
-  normal = TRUE,
-  Kmax = NULL,
-  ...
+    obj,
+    Kmethod = c("elbow", "BE"),
+    normal = TRUE,
+    Kmax = NULL,
+    ...
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -54,11 +54,11 @@ loopQTLchooseK <- function(
 ## loopQTLchooseK() and runQTL() (so we don't RINT twice when runQTL
 ## already RINT'd the matrix it's passing).
 .pca_for_qtl <- function(
-  Y,
-  samples,
-  Kmethod = c("elbow", "BE"),
-  Kmax = NULL,
-  ...
+    Y,
+    samples,
+    Kmethod = c("elbow", "BE"),
+    Kmax = NULL,
+    ...
 ) {
     Kmethod <- match.arg(Kmethod)
     if (is.null(Kmax)) Kmax <- max(1, length(samples) - 2)

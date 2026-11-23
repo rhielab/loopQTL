@@ -26,8 +26,8 @@
 #' ## check at samples level.
 #' pair <- loopQTLpairData(
 #'     obj,
-#'     loopID = "L0000187_chr1_46030000_46220000",
-#'     snpID  = "rs11584814"
+#'     loopID = "L0000037_chr2_172207000_172457000",
+#'     snpID  = "rs12052253"
 #' )
 #' head(pair)
 loopQTLpairData <- function(obj, loopID, snpID, normal = TRUE) {

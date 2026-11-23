@@ -48,7 +48,7 @@ The class constructor returns a \code{loopQTL} S4 object. The accessor methods
 return the following slot contents:
 \itemize{
 \item \code{samples(obj)}: character vector of sample IDs.
-\item \code{loops(obj)}: consensus loops as a \link[InteractionSet:GInteractions]{InteractionSet::GInteractions}
+\item \code{loops(obj)}: consensus loops as a \link[InteractionSet:GInteractions-class]{InteractionSet::GInteractions}
 object.
 \item \code{cis(obj)}: named numeric vector of per-sample cis-contact totals,
 or \code{numeric(0)} if not set.
@@ -78,7 +78,7 @@ to access \code{results(obj)}, use \code{loopQTL::results(obj)}.
 \item{\code{samples}}{List of unique sample IDs}
 
 \item{\code{loops}}{Consensus intra-chromosomal loops as a
-\link[InteractionSet:GInteractions]{InteractionSet::GInteractions} object}
+\link[InteractionSet:GInteractions-class]{InteractionSet::GInteractions} object}
 
 \item{\code{cis}}{Optional numeric vector of per-sample cis-contact totals. Must
 have names matching the IDs in \code{samples}, and be in the same order as

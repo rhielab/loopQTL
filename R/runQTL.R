@@ -46,13 +46,13 @@
 #'     covariates = Kres$PCs
 #' )
 runQTL <- function(
-  obj,
-  window = 0,
-  covariates = NULL,
-  normal = TRUE,
-  Kmethod = c("elbow", "BE"),
-  Kmax = NULL,
-  pvOutputThreshold = 1
+    obj,
+    window = 0,
+    covariates = NULL,
+    normal = TRUE,
+    Kmethod = c("elbow", "BE"),
+    Kmax = NULL,
+    pvOutputThreshold = 1
 ) {
     stopifnot(
         methods::is(obj, "loopQTL"),
@@ -344,9 +344,9 @@ runQTL <- function(
 
 ## Run MatrixEQTL and return a simplified data.frame of cis hits
 .run_matrix_eqtl <- function(
-  snpsSd, geneSD, cvrtSd,
-  snpspos, genepos,
-  cisDist, pvOutputThreshold
+    snpsSd, geneSD, cvrtSd,
+    snpspos, genepos,
+    cisDist, pvOutputThreshold
 ) {
     tmpCis <- tempfile()
     on.exit(unlink(tmpCis), add = TRUE)

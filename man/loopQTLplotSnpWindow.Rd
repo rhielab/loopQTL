@@ -118,10 +118,10 @@ obj <- loopQTLExampleData()
 head(results(obj))
 p <- loopQTLplotSnpWindow(
     obj,
-    chrom      = "chr1",
-    start      = 45900000,
-    end        = 46300000,
-    snpID      = "rs11584814",
+    chrom      = "chr2",
+    start      = 172100000,
+    end        = 172550000,
+    snpID      = "rs12052253",
     normal     = TRUE,
     covariates = "auto"
 )
