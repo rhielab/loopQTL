@@ -33,13 +33,6 @@ tests the association between variants and their anchored loops,
 together with downstream functions for annotation and visualization
 for the user's convenience.
 
-This vignette walks through the basic loopQTL workflow.
-
-[^Brant] [Fletez-Brant K, Qiu Y, Gorkin DU, Hu M, Hansen KD. Removing unwanted
-variation between samples in Hi-C experiments. Brief Bioinform. 2024 Mar
-27;25(3):bbae217. doi: 10.1093/bib/bbae217. PMID: 38711367; PMCID:
-PMC11074651.](https://doi.org/10.1093/bib/bbae217)
-
 # Acquiring and installing loopQTL and associated packages
 
 ## System requirements
