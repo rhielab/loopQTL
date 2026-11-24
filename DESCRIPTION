@@ -1,6 +1,6 @@
 Package: loopQTL
 Title: Anchor-Restricted Loop QTL Mapping from Hi-C
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: c(
     person("Rhie Lab at the University of Southern California",
         email = "rhielab@gmail.com", role = "cre"),
